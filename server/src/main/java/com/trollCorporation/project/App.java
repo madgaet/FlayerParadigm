@@ -20,10 +20,9 @@ public class App
     	try {
     		InetAddress adresseLocale = InetAddress.getLocalHost();
     		System.out.println(adresseLocale);
-    		System.out.println("adresse server : " + InetAddress.getByName("Madgaet-PC"));
+    		logger.info("adresse server : " + adresseLocale);
     		Server server = new Server(port);
     		server.run();
-    		//server.stop();
     	} catch (IOException io) {
     		logger.error("Problem with connection server", io);
     		System.out.println("Internal error : shouldn't append");

@@ -40,6 +40,7 @@ public class Client implements Runnable {
 				((MessageOperation)operation).getMessage().getMessageValue();
 			receiveMessage("Bienvenue " + name + "!");
 			server.sendUsersListToAllClients();
+			LOGGER.info("Client " + name + " is connected!");
 			while (!socket.isClosed()) {
 				operation = MessageUtils.getOperation(socket);
 				if (operation != null) {
@@ -64,6 +65,7 @@ public class Client implements Runnable {
 				}
 			}
 		} catch (IOException e) {
+			LOGGER.info("Client " + name + " disconnected for unknow reason!");
 			System.out.println("Client " + name + " disconnected for unknow reason!");
 			server.disconnect(this);
 		}
