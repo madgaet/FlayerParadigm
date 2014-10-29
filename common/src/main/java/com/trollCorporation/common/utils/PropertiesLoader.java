@@ -11,12 +11,11 @@ public class PropertiesLoader extends Properties {
 	
 	private static final long serialVersionUID = -6177664196910209606L;
 	private static Logger LOG = Logger.getLogger(PropertiesLoader.class.getName());
-	private Properties properties;
 	
 	public PropertiesLoader(final String filePath) throws ConfigurationException {
-		properties = new Properties();
+		super();
 		try {
-			properties.load(this.getClass().getClassLoader().getResourceAsStream(filePath));
+			super.load(this.getClass().getClassLoader().getResourceAsStream(filePath));
 		} catch (NullPointerException e) {
 			LOG.error("file not found. Wrong path", e);
 			throw new ConfigurationException("Properties file " + filePath + " not found!");

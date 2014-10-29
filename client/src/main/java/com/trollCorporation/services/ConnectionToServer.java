@@ -34,6 +34,7 @@ public class ConnectionToServer {
 		} catch (IOException e) {
 			System.out.println("Unable to connect to " + address +" on port " + port + ".");
 			LOG.error("Unable to connect to " + address + ":" + port);
+			System.exit(0);
 		} 
 	}
 	
