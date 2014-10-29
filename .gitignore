@@ -1,0 +1,9 @@
+common/.classpath
+common/.project
+common/.settings/org.eclipse.jdt.core.prefs
+common/.settings/org.eclipse.m2e.core.prefs
+server/.classpath
+server/.project
+server/.settings/org.eclipse.jdt.core.prefs
+server/.settings/org.eclipse.m2e.core.prefs
+server/.settings/org.jboss.ide.eclipse.as.core.prefs
