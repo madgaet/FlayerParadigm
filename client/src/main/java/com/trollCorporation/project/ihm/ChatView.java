@@ -1,22 +1,21 @@
 package com.trollCorporation.project.ihm;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.GridLayout;
-import java.awt.Toolkit;
+import java.awt.Dimension;
 import java.util.List;
 
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
+import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 
 import com.trollCorporation.common.utils.Observer;
 import com.trollCorporation.project.controllers.ChatboxOperationsController;
-import com.trollCorporation.project.ihm.actions.SendingMessageActionListener;
+import com.trollCorporation.project.ihm.actions.SendingMessageKeyListener;
 
 public class ChatView extends JPanel implements Observer {
 
@@ -25,48 +24,62 @@ public class ChatView extends JPanel implements Observer {
 	 */
 	private static final long serialVersionUID = 7679035020047514901L;
 
-	private JPanel chatBox;
-	private JPanel userList;
+	private Box chatBox;
+	private Box userList;
 	private JPanel textBox;
 	private JTextField textField;
 	private ChatboxOperationsController chatboxController;
+	private Dimension dimension;
 	
-	public ChatView(ChatboxOperationsController msgController) {
+	public ChatView(ChatboxOperationsController msgController, Dimension viewDimension) {
+		this.dimension = viewDimension;
+		this.setPreferredSize(dimension);
 		this.chatboxController = msgController;
 		msgController.addObserver(this);
-		this.setLayout(new BorderLayout());
 		createChatView();
+		this.setBorder(new LineBorder(Color.PINK));
+		this.setBackground(Color.GRAY);
 	}
 	
 	public void createChatView() {
-		this.add(createChatBox(), BorderLayout.CENTER);
-		this.add(createUserList(), BorderLayout.EAST);
-		this.add(createTextBox(), BorderLayout.SOUTH);
+		Box chatView = Box.createHorizontalBox();
+		//left part of chat view
+		Box chat = Box.createVerticalBox();
+		chat.add(createChatBox());
+		chat.add(createTextBox());
+		chatView.add(chat);
+		//right part of chat view
+		chatView.add(createUserList());
+		
+		this.add(chatView);
 	}
 	
 	private JScrollPane createChatBox() {
-		chatBox = new JPanel(new GridLayout(0, 1));
-		String titleChatBox = "ChatBox";
+		chatBox = Box.createVerticalBox();
+		JScrollPane jspChatBox = new JScrollPane(chatBox);
 		Border lineBorder =	BorderFactory.createLineBorder(Color.BLUE);
-		chatBox.setBorder(BorderFactory.createTitledBorder(lineBorder, titleChatBox));
-		return new JScrollPane(chatBox);
+		String titleChatBox = "ChatBox";
+		jspChatBox.setBorder(BorderFactory.createTitledBorder(lineBorder, titleChatBox));
+		jspChatBox.setPreferredSize(new Dimension((dimension.width/3*2), dimension.height/6*5));
+		return jspChatBox;
 	}
 	
-	private JPanel createUserList() {
-		userList = new JPanel(new GridLayout(0, 1));
-		userList.setBorder(BorderFactory.createLineBorder(Color.GRAY, 2));
-		return userList;
+	private JScrollPane createUserList() {
+		userList = Box.createVerticalBox();
+		JScrollPane jspUserList = new JScrollPane(userList);
+		Border lineBorder = BorderFactory.createLineBorder(Color.GRAY, 2);
+		String titleUserList = "Friends";
+		jspUserList.setBorder(BorderFactory.createTitledBorder(lineBorder, titleUserList));
+		jspUserList.setPreferredSize(new Dimension(dimension.width/48*15, dimension.height));
+		return jspUserList;
 	}
 	
 	private JPanel createTextBox() {
 		textBox = new JPanel();
-		double frameWidth = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
-		textField = new JTextField((int)Math.round(frameWidth/12));
+		textField = new JTextField(dimension.width/18);
+		textField.addKeyListener(new SendingMessageKeyListener(textField, chatboxController));
 		textBox.add(textField);
-		JButton jbtn = new JButton("Send");
-		jbtn.addActionListener(
-				new SendingMessageActionListener(textField, chatboxController));
-		textBox.add(jbtn);
+		textBox.setPreferredSize(new Dimension(dimension.width/3*2, dimension.height/6));
 		return textBox;
 	}
 	
