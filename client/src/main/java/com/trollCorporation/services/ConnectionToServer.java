@@ -2,6 +2,7 @@ package com.trollCorporation.services;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.URL;
 
 import javax.naming.ConfigurationException;
 
@@ -17,25 +18,36 @@ import com.trollCorporation.project.exceptions.ConnectionException;
 public class ConnectionToServer {
 
 	private static Logger LOG = Logger.getLogger(ConnectionToServer.class.getName());
-	private Socket sock;
-	
-	public ConnectionToServer() {
-		String address = "";
-		int port = 0;
+	private static String serverAddress;
+	private static int serverPort;
+	static {
 		try {
-			PropertiesLoader props = 
-					new PropertiesLoader("config.properties");
-			address = props.getProperty("address", "localhost");
-			port = Integer.valueOf(props.getProperty("port", "4242"));
-			sock = new Socket(address, port);
+			PropertiesLoader props = new PropertiesLoader("config.properties");
+			serverAddress = props.getProperty("address", "localhost");
+			serverPort = Integer.valueOf(props.getProperty("port", "4242"));
 		} catch (ConfigurationException e) {
 			System.out.println("Wrong configuration");
 			LOG.error("Wrong configuration");
+		}
+	}
+	
+	public static boolean isConnectionToServerPossible() {
+		try {
+			URL url = new URL("http://" + serverAddress);
+            return (url.openConnection()!=null);
 		} catch (IOException e) {
-			System.out.println("Unable to connect to " + address +" on port " + port + ".");
-			LOG.error("Unable to connect to " + address + ":" + port);
-			System.exit(0);
-		} 
+			return false;
+		}
+	}
+
+	private Socket sock;
+	
+	public ConnectionToServer() {
+		this(serverAddress, serverPort);
+	}
+	
+	public ConnectionToServer(int port){
+		this(serverAddress, port);
 	}
 	
 	public ConnectionToServer(String address, int port){
@@ -43,10 +55,9 @@ public class ConnectionToServer {
 			sock = new Socket(address, port);
 			System.out.println("new sock ok");
 			System.out.println(sock.getRemoteSocketAddress());
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			System.out.println("Unable to connect to " + address +" on port " + port + ".");
-			e.printStackTrace();
+			LOG.error("Unable to connect to " + address + ":" + port);
 		}
 	}
 	

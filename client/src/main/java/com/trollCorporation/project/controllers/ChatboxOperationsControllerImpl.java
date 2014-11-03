@@ -26,14 +26,18 @@ public class ChatboxOperationsControllerImpl implements ChatboxOperationsControl
 	private Message lastMessage;
 	private boolean activeUsersChanged;
 	private ActiveUsers activeUsers;
+	private String username;
 	
-	public ChatboxOperationsControllerImpl() {
+	public ChatboxOperationsControllerImpl(final String username) {
+		this.username = username;
 		this.interrupted = false;
 		this.connection = new ConnectionToServer();
 		new ChatboxControllerThread().start();
 	}
 	
-	public ChatboxOperationsControllerImpl(final String address, final int port) {
+	public ChatboxOperationsControllerImpl(final String username, final String address,
+			final int port) {
+		this.username = username;
 		this.interrupted = false;
 		this.connection = new ConnectionToServer(address, port);
 		new ChatboxControllerThread().start();
@@ -85,13 +89,7 @@ public class ChatboxOperationsControllerImpl implements ChatboxOperationsControl
 	private class ChatboxControllerThread extends Thread {
 
 		public void run() {
-			//TEMPORAIRE
-			String name = null;
-			while(name == null || name.isEmpty()) {
-				name = JOptionPane.showInputDialog("What's your name ?");
-			}
-			sendMessage(name);
-			//FIN TEMPORAIRE
+			sendMessage(username);
 			while (!interrupted) {
 				try {
 					lastMessageChanged = false;

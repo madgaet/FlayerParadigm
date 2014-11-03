@@ -18,16 +18,17 @@ public class HomePage extends JFrame {
 	private static final long serialVersionUID = -1090911947475162016L;
 	private Dimension pageDimension;
 
-	public HomePage() {
+	public HomePage(final String username) {
 		this.pageDimension = Toolkit.getDefaultToolkit().getScreenSize();
-		createHomePage();
+		createHomePage(username);
+		this.setTitle(username);
 		this.setSize(pageDimension);
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 	}
 	
-	public void createHomePage() {
+	public void createHomePage(final String username) {
 		Box homePage = Box.createVerticalBox();
 		//Banner
 		Box banner = Box.createHorizontalBox();
@@ -47,7 +48,7 @@ public class HomePage extends JFrame {
 		
 		//Chat
 		Box chat = Box.createHorizontalBox();
-		ChatboxOperationsController msgController = new ChatboxOperationsControllerImpl();
+		ChatboxOperationsController msgController = new ChatboxOperationsControllerImpl(username);
 		Dimension chatDimension = new Dimension(pageDimension.width, pageDimension.height/3);
 		JPanel jpChatView = new ChatView(msgController, chatDimension);
 		jpChatView.setPreferredSize(chatDimension);
