@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import com.trollCorporation.project.exceptions.ConnectionException;
 import com.trollCorporation.project.ihm.HomePage;
 import com.trollCorporation.services.ConnectionToServer;
 
@@ -76,19 +77,28 @@ public class ConnectionPage extends JFrame {
 	
 	private class LoginActionListener implements ActionListener {
 		public void actionPerformed(ActionEvent arg0) {
-			if (ConnectionToServer.isConnectionToServerPossible()) {
-				if (!jtfUsername.getText().trim().isEmpty()) {
-					new HomePage(jtfUsername.getText());
+			try {
+				if (ConnectionToServer.isConnectionToServerPossible()) {
+					if (!jtfUsername.getText().trim().isEmpty()) {
+						new HomePage(jtfUsername.getText());
+						singleton.setVisible(false);
+					} else {
+						infoPanel.setBackground(Color.RED);
+						infoLabel.setText("The user field cannot be empty!");
+						singleton.pack();
+					}
 				} else {
-					infoPanel.setBackground(Color.RED);
-					infoLabel.setText("The user field cannot be empty!");
-					singleton.pack();
+					setInternetErrorMessage();
 				}
-			} else {
-				infoPanel.setBackground(Color.RED);
-				infoLabel.setText("Verify your internet connection!");
-				singleton.pack();
+			} catch (ConnectionException e) {
+				setInternetErrorMessage();
 			}
+		}
+		
+		private void setInternetErrorMessage() {
+			infoPanel.setBackground(Color.RED);
+			infoLabel.setText("Verify your internet connection!");
+			singleton.pack();
 		}
 	}
 	

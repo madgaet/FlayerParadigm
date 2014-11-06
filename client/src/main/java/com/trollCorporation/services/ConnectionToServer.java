@@ -2,17 +2,14 @@ package com.trollCorporation.services;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.net.URL;
-
-import javax.naming.ConfigurationException;
 
 import org.apache.log4j.Logger;
 
 import com.trollCorporation.common.model.Message;
 import com.trollCorporation.common.model.MessageOperation;
 import com.trollCorporation.common.model.Operation;
+import com.trollCorporation.common.utils.ConfigurationsUtils;
 import com.trollCorporation.common.utils.MessageUtils;
-import com.trollCorporation.common.utils.PropertiesLoader;
 import com.trollCorporation.project.exceptions.ConnectionException;
 
 public class ConnectionToServer {
@@ -21,43 +18,37 @@ public class ConnectionToServer {
 	private static String serverAddress;
 	private static int serverPort;
 	static {
-		try {
-			PropertiesLoader props = new PropertiesLoader("config.properties");
-			serverAddress = props.getProperty("address", "localhost");
-			serverPort = Integer.valueOf(props.getProperty("port", "4242"));
-		} catch (ConfigurationException e) {
-			System.out.println("Wrong configuration");
-			LOG.error("Wrong configuration");
-		}
+		serverAddress = ConfigurationsUtils.getProperty("address", "localhost");
+		serverPort = Integer.valueOf(ConfigurationsUtils.getProperty("port", "4242"));
 	}
 	
 	public static boolean isConnectionToServerPossible() {
 		try {
-			URL url = new URL("http://" + serverAddress);
-            return (url.openConnection()!=null);
-		} catch (IOException e) {
+			new ConnectionToServer(42424);
+			return true;
+		} catch (ConnectionException e) {
 			return false;
 		}
 	}
 
 	private Socket sock;
 	
-	public ConnectionToServer() {
+	public ConnectionToServer() throws ConnectionException {
 		this(serverAddress, serverPort);
 	}
 	
-	public ConnectionToServer(int port){
+	public ConnectionToServer(int port) throws ConnectionException{
 		this(serverAddress, port);
 	}
 	
-	public ConnectionToServer(String address, int port){
+	public ConnectionToServer(String address, int port) throws ConnectionException{
 		try {
 			sock = new Socket(address, port);
-			System.out.println("new sock ok");
 			System.out.println(sock.getRemoteSocketAddress());
 		} catch (IOException e) {
 			System.out.println("Unable to connect to " + address +" on port " + port + ".");
 			LOG.error("Unable to connect to " + address + ":" + port);
+			throw new ConnectionException("Unable to connect to server");
 		}
 	}
 	

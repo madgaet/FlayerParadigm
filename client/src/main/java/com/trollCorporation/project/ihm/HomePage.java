@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 
 import com.trollCorporation.project.controllers.ChatboxOperationsController;
 import com.trollCorporation.project.controllers.ChatboxOperationsControllerImpl;
+import com.trollCorporation.project.exceptions.ConnectionException;
 
 public class HomePage extends JFrame {
 
@@ -18,7 +19,7 @@ public class HomePage extends JFrame {
 	private static final long serialVersionUID = -1090911947475162016L;
 	private Dimension pageDimension;
 
-	public HomePage(final String username) {
+	public HomePage(final String username) throws ConnectionException {
 		this.pageDimension = Toolkit.getDefaultToolkit().getScreenSize();
 		createHomePage(username);
 		this.setTitle(username);
@@ -28,7 +29,7 @@ public class HomePage extends JFrame {
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 	}
 	
-	public void createHomePage(final String username) {
+	public void createHomePage(final String username) throws ConnectionException {
 		Box homePage = Box.createVerticalBox();
 		//Banner
 		Box banner = Box.createHorizontalBox();

@@ -15,7 +15,6 @@ import com.trollCorporation.exceptions.UnknownTargetException;
 
 public class Server implements Runnable {
 	
-	//wait 5 minutes for a connection.
 	private final Logger LOGGER = Logger.getLogger(Server.class.getName());
 	
 	private ServerSocket socketServer;

@@ -28,7 +28,7 @@ public class ChatboxOperationsControllerImpl implements ChatboxOperationsControl
 	private ActiveUsers activeUsers;
 	private String username;
 	
-	public ChatboxOperationsControllerImpl(final String username) {
+	public ChatboxOperationsControllerImpl(final String username) throws ConnectionException {
 		this.username = username;
 		this.interrupted = false;
 		this.connection = new ConnectionToServer();
@@ -36,7 +36,7 @@ public class ChatboxOperationsControllerImpl implements ChatboxOperationsControl
 	}
 	
 	public ChatboxOperationsControllerImpl(final String username, final String address,
-			final int port) {
+			final int port) throws ConnectionException {
 		this.username = username;
 		this.interrupted = false;
 		this.connection = new ConnectionToServer(address, port);
@@ -45,11 +45,14 @@ public class ChatboxOperationsControllerImpl implements ChatboxOperationsControl
 	
 	public boolean sendMessage(final String message) {
 		try {
-			connection.sendMessage(message);
-			return true;
+			if (message != null && !message.trim().isEmpty()) {
+				connection.sendMessage(message);
+				return true;
+			}
 		} catch (ConnectionException e) {
-			return false;
+			JOptionPane.showMessageDialog(null, "Verify your connection!");
 		}
+		return false;
 	}
 	
 	public boolean isLastMessageChanged() {
