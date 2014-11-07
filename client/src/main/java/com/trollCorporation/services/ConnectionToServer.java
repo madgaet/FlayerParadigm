@@ -5,9 +5,13 @@ import java.net.Socket;
 
 import org.apache.log4j.Logger;
 
+import com.trollCorporation.common.model.ConnectionOperation;
+import com.trollCorporation.common.model.ListUsersOperation;
 import com.trollCorporation.common.model.Message;
 import com.trollCorporation.common.model.MessageOperation;
 import com.trollCorporation.common.model.Operation;
+import com.trollCorporation.common.model.OperationType;
+import com.trollCorporation.common.model.User;
 import com.trollCorporation.common.utils.ConfigurationsUtils;
 import com.trollCorporation.common.utils.MessageUtils;
 import com.trollCorporation.project.exceptions.ConnectionException;
@@ -70,6 +74,36 @@ public class ConnectionToServer {
 			LOG.error("sending message isn't working");
 			throw new ConnectionException(e.getMessage());
 		}
+	}
+	
+	public void requestFriendsList() throws ConnectionException {
+		try {
+			ListUsersOperation listUsersOperation = new ListUsersOperation();
+			MessageUtils.sendOperation(sock, listUsersOperation);
+		} catch (IOException e) {
+			LOG.error("sending friends list request isn't working");
+			throw new ConnectionException(e.getMessage());
+		}
+	}
+	
+	public boolean connectUserToServer(final User user) throws ConnectionException {
+		try {
+			ConnectionOperation connOperation = new ConnectionOperation(user);
+			MessageUtils.sendOperation(sock, connOperation);
+			Operation operation = MessageUtils.getOperation(sock);
+			if (operation.getOperationType().equals(OperationType.CONNECTION)) {
+				ConnectionOperation connOpe = (ConnectionOperation) operation;
+				return connOpe.isConnected();
+			}
+		} catch (IOException e) {
+			LOG.error("sending try connection isn't working");
+			throw new ConnectionException(e.getMessage());
+		}
+		return false;
+	}
+	
+	public void close() throws IOException {
+		sock.close();
 	}
 }
 

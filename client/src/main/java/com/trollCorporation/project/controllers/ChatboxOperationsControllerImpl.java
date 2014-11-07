@@ -26,21 +26,25 @@ public class ChatboxOperationsControllerImpl implements ChatboxOperationsControl
 	private Message lastMessage;
 	private boolean activeUsersChanged;
 	private ActiveUsers activeUsers;
-	private String username;
 	
-	public ChatboxOperationsControllerImpl(final String username) throws ConnectionException {
-		this.username = username;
+	public ChatboxOperationsControllerImpl(final ConnectionToServer connection)  
+			throws ConnectionException {
+		this.connection = connection;
+		startChatboxController();
+	}
+	
+	private void startChatboxController() {
 		this.interrupted = false;
-		this.connection = new ConnectionToServer();
+		getFriendsList();
 		new ChatboxControllerThread().start();
 	}
 	
-	public ChatboxOperationsControllerImpl(final String username, final String address,
-			final int port) throws ConnectionException {
-		this.username = username;
-		this.interrupted = false;
-		this.connection = new ConnectionToServer(address, port);
-		new ChatboxControllerThread().start();
+	public void getFriendsList() {
+		try {
+			connection.requestFriendsList();
+		} catch (ConnectionException e) {
+			//should not
+		}
 	}
 	
 	public boolean sendMessage(final String message) {
@@ -92,7 +96,6 @@ public class ChatboxOperationsControllerImpl implements ChatboxOperationsControl
 	private class ChatboxControllerThread extends Thread {
 
 		public void run() {
-			sendMessage(username);
 			while (!interrupted) {
 				try {
 					lastMessageChanged = false;

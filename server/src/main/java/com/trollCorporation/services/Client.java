@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.trollCorporation.common.model.ActiveUsers;
+import com.trollCorporation.common.model.ConnectionOperation;
 import com.trollCorporation.common.model.ListUsersOperation;
 import com.trollCorporation.common.model.Message;
 import com.trollCorporation.common.model.MessageOperation;
@@ -33,18 +34,21 @@ public class Client implements Runnable {
 	
 	public void run() {
 		LOGGER.info("Processing client " + clientNumber + " ...");
-		System.out.println("Send welcome message");
 		try {
-			Operation operation = MessageUtils.getOperation(socket);
-			this.name = operation == null ? "Pseudo" : 
-				((MessageOperation)operation).getMessage().getMessageValue();
-			receiveMessage("Bienvenue " + name + "!");
-			server.sendUsersListToAllClients();
-			LOGGER.info("Client " + name + " is connected!");
 			while (!socket.isClosed()) {
-				operation = MessageUtils.getOperation(socket);
+				Operation operation = MessageUtils.getOperation(socket);
 				if (operation != null) {
 					switch (operation.getOperationType()) {
+					case CONNECTION :
+						if (operation instanceof ConnectionOperation) {
+							ConnectionOperation connectionOperation = (ConnectionOperation) operation;
+							if (receiveConnectionAck(connectionOperation)) {
+								LOGGER.info("Client " + name + " is connected!");
+							} else {
+								LOGGER.info("Failed connection attempt!");
+							}
+						}
+						break;
 					case CHATBOX_MAILING :
 						if (operation instanceof MessageOperation) {
 							MessageOperation messageOperation = (MessageOperation) operation;
@@ -59,7 +63,7 @@ public class Client implements Runnable {
 						}
 						break;
 					case CHATBOX_USERS_LISTING :
-						//a client shouldn't ask for the list of users
+						server.sendUsersListToAllClients();
 						break;
 					}
 				}
@@ -79,6 +83,17 @@ public class Client implements Runnable {
 				socket.close();
 			} catch (IOException ignoredException) {
 			}
+		}
+	}
+	
+	public boolean receiveConnectionAck(ConnectionOperation connectionOperation) throws IOException {
+		connectionOperation.connect(connectionOperation.getEncryptedPassword());
+		MessageUtils.sendOperation(socket, connectionOperation);
+		if (connectionOperation.isConnected()) {
+			this.name = connectionOperation.getUserName();
+			return true;
+		} else {
+			return false;
 		}
 	}
 	
