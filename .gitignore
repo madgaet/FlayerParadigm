@@ -7,3 +7,6 @@ server/.project
 server/.settings/org.eclipse.jdt.core.prefs
 server/.settings/org.eclipse.m2e.core.prefs
 server/.settings/org.jboss.ide.eclipse.as.core.prefs
+domain/.settings/org.eclipse.jdt.core.prefs
+domain/.settings/org.eclipse.m2e.core.prefs
+*.project
