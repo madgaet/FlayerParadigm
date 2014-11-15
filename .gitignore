@@ -10,3 +10,6 @@ server/.settings/org.jboss.ide.eclipse.as.core.prefs
 domain/.settings/org.eclipse.jdt.core.prefs
 domain/.settings/org.eclipse.m2e.core.prefs
 *.project
+*.prefs
+domain/.settings/org.eclipse.wst.common.project.facet.core.prefs.xml
+domain/.settings/org.eclipse.wst.common.project.facet.core.xml

@@ -25,8 +25,11 @@ public class ConnectionOperation extends Operation {
 	}
 	
 	public void connect(String encryptPassword) {
-//TODO		this.connected = user.getPassword().equals(encryptPassword);
-		this.connected = user.getName() != null && !user.getName().isEmpty();
+		if (encryptPassword == null) {
+			this.connected = false;
+		} else {
+			this.connected = getEncryptedPassword().equals(encryptPassword);
+		}
 	}
 
 }

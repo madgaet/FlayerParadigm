@@ -1,10 +1,7 @@
 package com.trollCorporation.project.client;
 
-import java.io.IOException;
-
-import com.trollCorporation.project.controllers.ChatboxOperationsController;
-import com.trollCorporation.project.controllers.ChatboxOperationsControllerImpl;
 import com.trollCorporation.project.controllers.ConnectionControllerImpl;
+import com.trollCorporation.project.exceptions.AuthenticationException;
 import com.trollCorporation.project.exceptions.ConnectionException;
 import com.trollCorporation.project.ihm.HomePage;
 import com.trollCorporation.project.ihm.connection.ConnectionPage;
@@ -19,8 +16,6 @@ public class Game {
 	
 	private ConnectionToServer connection;
 	
-	private ChatboxOperationsController chatboxController;
-	
 	private Game() {
 		connPage = new ConnectionPage();
 	}
@@ -34,26 +29,26 @@ public class Game {
 	
 	private void setUpConnection() throws ConnectionException {
 		if (connection == null) {
-			connection = new ConnectionToServer();
+			connection = ConnectionToServer.getInstance();
 		}
 	}
 	
 	private void setDownConnection() {
 		if (connection != null) {
-			try {
-				connection.close();
-			} catch (IOException e) {
-				//do nothing the connection is closed anyway
-			}
-			connection = null;
+			connection.close();
 		}
 	}
 	
-	public void connect(String username, String password) throws ConnectionException {
+	public void connect(String username, String password) 
+			throws ConnectionException, AuthenticationException {
 		setUpConnection();
-		new ConnectionControllerImpl(username, password, connection);
-		chatboxController = new ChatboxOperationsControllerImpl(connection);
-		homePage = new HomePage(username, chatboxController);
+		try {
+			new ConnectionControllerImpl(username, password, connection);
+		} catch (AuthenticationException a) {
+			setDownConnection();
+			throw a;
+		}
+		homePage = new HomePage(username);
 		connPage.setVisible(false);
 	}
 	

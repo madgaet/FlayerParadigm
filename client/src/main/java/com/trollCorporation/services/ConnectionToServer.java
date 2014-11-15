@@ -19,49 +19,45 @@ import com.trollCorporation.project.exceptions.ConnectionException;
 public class ConnectionToServer {
 
 	private static Logger LOG = Logger.getLogger(ConnectionToServer.class.getName());
+	private static ConnectionToServer singleton;
 	private static String serverAddress;
 	private static int serverPort;
 	static {
 		serverAddress = ConfigurationsUtils.getProperty("address", "localhost");
 		serverPort = Integer.valueOf(ConfigurationsUtils.getProperty("port", "4242"));
 	}
-	
-	public static boolean isConnectionToServerPossible() {
-		try {
-			new ConnectionToServer(42424);
-			return true;
-		} catch (ConnectionException e) {
-			return false;
-		}
-	}
 
 	private Socket sock;
 	
-	public ConnectionToServer() throws ConnectionException {
-		this(serverAddress, serverPort);
+	public synchronized static ConnectionToServer getInstance() 
+		throws ConnectionException {
+		if (singleton == null) {
+			synchronized (ConnectionToServer.class) {
+				if (singleton == null) {
+					singleton = new ConnectionToServer(serverAddress, serverPort);
+				}
+			}
+		}
+		return singleton;
 	}
 	
-	public ConnectionToServer(int port) throws ConnectionException{
+	private ConnectionToServer(int port) throws ConnectionException{
 		this(serverAddress, port);
 	}
 	
-	public ConnectionToServer(String address, int port) throws ConnectionException{
-		try {
-			sock = new Socket(address, port);
-			System.out.println(sock.getRemoteSocketAddress());
-		} catch (IOException e) {
-			System.out.println("Unable to connect to " + address +" on port " + port + ".");
-			LOG.error("Unable to connect to " + address + ":" + port);
-			throw new ConnectionException("Unable to connect to server");
-		}
+	private ConnectionToServer(String address, int port) throws ConnectionException{
+		serverAddress = address;
+		serverPort = port;
 	}
 	
-	public Operation getOperation() throws ConnectionException {
+	private void createSocket() throws ConnectionException {
 		try {
-			return MessageUtils.getOperation(sock);
+			sock = new Socket(serverAddress, serverPort);
+			System.out.println(sock.getRemoteSocketAddress());
 		} catch (IOException e) {
-			LOG.error("getting message isn't working");
-			throw new ConnectionException(e.getMessage());
+			System.out.println("Unable to connect to " + serverAddress +" on port " + serverPort + ".");
+			LOG.error("Unable to connect to " + serverAddress + ":" + serverPort);
+			throw new ConnectionException("Unable to connect to server");
 		}
 	}
 	
@@ -88,22 +84,39 @@ public class ConnectionToServer {
 	
 	public boolean connectUserToServer(final User user) throws ConnectionException {
 		try {
+			createSocket();
 			ConnectionOperation connOperation = new ConnectionOperation(user);
 			MessageUtils.sendOperation(sock, connOperation);
-			Operation operation = MessageUtils.getOperation(sock);
-			if (operation.getOperationType().equals(OperationType.CONNECTION)) {
-				ConnectionOperation connOpe = (ConnectionOperation) operation;
-				return connOpe.isConnected();
-			}
+			int retry = 0;
+			Operation operation;
+			do {
+				operation = MessageUtils.getOperation(sock);
+				if (operation.getOperationType().equals(OperationType.CONNECTION)) {
+					ConnectionOperation connOpe = (ConnectionOperation) operation;
+					return connOpe.isConnected();
+				}
+				retry ++;
+			} while (!operation.getOperationType().equals(OperationType.CONNECTION)
+					|| retry >= 10);
 		} catch (IOException e) {
 			LOG.error("sending try connection isn't working");
 			throw new ConnectionException(e.getMessage());
 		}
+		close();
 		return false;
 	}
 	
-	public void close() throws IOException {
-		sock.close();
+	public void close() {
+		try {
+			sock.close();
+		} catch (IOException e) {
+			// shouldn't be checked
+		}
+		sock = null;
+	}
+	
+	public Socket getSocket() {
+		return sock;
 	}
 }
 

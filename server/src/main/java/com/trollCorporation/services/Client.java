@@ -14,6 +14,8 @@ import com.trollCorporation.common.model.MessageOperation;
 import com.trollCorporation.common.model.Operation;
 import com.trollCorporation.common.model.User;
 import com.trollCorporation.common.utils.MessageUtils;
+import com.trollCorporation.domain.services.UsersServices;
+import com.trollCorporation.domain.services.UsersServicesImpl;
 import com.trollCorporation.exceptions.UnknownTargetException;
 
 public class Client implements Runnable {
@@ -24,6 +26,7 @@ public class Client implements Runnable {
 	private Server server;
 	private int clientNumber;
 	private String name;
+	private UsersServices userServices = UsersServicesImpl.getInstance();
 	
 	public Client(final Socket socket,final Server server) {
 		this.socket = socket;
@@ -40,14 +43,7 @@ public class Client implements Runnable {
 				if (operation != null) {
 					switch (operation.getOperationType()) {
 					case CONNECTION :
-						if (operation instanceof ConnectionOperation) {
-							ConnectionOperation connectionOperation = (ConnectionOperation) operation;
-							if (receiveConnectionAck(connectionOperation)) {
-								LOGGER.info("Client " + name + " is connected!");
-							} else {
-								LOGGER.info("Failed connection attempt!");
-							}
-						}
+						connect(operation);
 						break;
 					case CHATBOX_MAILING :
 						if (operation instanceof MessageOperation) {
@@ -76,6 +72,19 @@ public class Client implements Runnable {
 		LOGGER.info("Ending client " + clientNumber + " process!");
 	}
 	
+	private void connect(Operation operation) throws IOException {
+		if (operation instanceof ConnectionOperation) {
+			ConnectionOperation connectionOperation = (ConnectionOperation) operation;
+			User user = userServices.getUserByName(connectionOperation.getUserName());
+			connectionOperation.connect(user.getPassword());
+			if (receiveConnectionAck(connectionOperation)) {
+				LOGGER.info("Client " + name + " is connected!");
+			} else {
+				LOGGER.info("Failed connection attempt!");
+			}
+		}
+	}
+	
 	public void close() {
 		if (socket != null) {
 			LOGGER.info("Closing socket of client " + clientNumber);
@@ -87,12 +96,12 @@ public class Client implements Runnable {
 	}
 	
 	public boolean receiveConnectionAck(ConnectionOperation connectionOperation) throws IOException {
-		connectionOperation.connect(connectionOperation.getEncryptedPassword());
 		MessageUtils.sendOperation(socket, connectionOperation);
 		if (connectionOperation.isConnected()) {
 			this.name = connectionOperation.getUserName();
 			return true;
 		} else {
+			close();
 			return false;
 		}
 	}

@@ -1,17 +1,12 @@
 package com.trollCorporation.project.controllers;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.swing.JOptionPane;
 
 import com.trollCorporation.common.model.ActiveUsers;
-import com.trollCorporation.common.model.ListUsersOperation;
 import com.trollCorporation.common.model.Message;
-import com.trollCorporation.common.model.MessageOperation;
-import com.trollCorporation.common.model.Operation;
 import com.trollCorporation.common.model.User;
 import com.trollCorporation.common.utils.Observer;
 import com.trollCorporation.project.exceptions.ConnectionException;
@@ -19,24 +14,29 @@ import com.trollCorporation.services.ConnectionToServer;
 
 public class ChatboxOperationsControllerImpl implements ChatboxOperationsController {
 
+	private static ChatboxOperationsController singleton;
 	private ConnectionToServer connection;
-	private boolean interrupted;
-	private Set<Observer> observers = new HashSet<Observer>();
+	private Observer observer;
 	private boolean lastMessageChanged;
 	private Message lastMessage;
 	private boolean activeUsersChanged;
 	private ActiveUsers activeUsers;
 	
-	public ChatboxOperationsControllerImpl(final ConnectionToServer connection)  
+	private ChatboxOperationsControllerImpl()  
 			throws ConnectionException {
-		this.connection = connection;
-		startChatboxController();
+		this.connection = ConnectionToServer.getInstance();
 	}
 	
-	private void startChatboxController() {
-		this.interrupted = false;
-		getFriendsList();
-		new ChatboxControllerThread().start();
+	public synchronized static ChatboxOperationsController getInstance() 
+		throws ConnectionException {
+		if (singleton == null) {
+			synchronized (ConnectionToServer.class) {
+				if (singleton == null) {
+					singleton = new ChatboxOperationsControllerImpl();
+				}
+			}
+		}
+		return singleton;
 	}
 	
 	public void getFriendsList() {
@@ -63,7 +63,14 @@ public class ChatboxOperationsControllerImpl implements ChatboxOperationsControl
 		return lastMessageChanged;
 	}
 	
+	public void setMessage(final Message message) {
+		lastMessageChanged = true;
+		this.lastMessage = message;
+		notifyObservers();
+	}
+	
 	public String getMessage() {
+		lastMessageChanged = false;
 		return lastMessage.getMessageValue();
 	}
 	
@@ -71,7 +78,14 @@ public class ChatboxOperationsControllerImpl implements ChatboxOperationsControl
 		return activeUsersChanged;
 	}
 	
+	public void setActiveUsers(final ActiveUsers activeUsers) {
+		activeUsersChanged = true;
+		this.activeUsers = activeUsers;
+		notifyObservers();
+	}
+	
 	public List<String> getActiveUsers() {
+		activeUsersChanged = false;
 		List<String> usersToStringList = new ArrayList<String>();
 		for (User user : activeUsers.getUsers()) {
 			usersToStringList.add(user.getName());
@@ -79,51 +93,30 @@ public class ChatboxOperationsControllerImpl implements ChatboxOperationsControl
 		return usersToStringList;
 	}
 	
-	public void addObserver(Observer observer) {
-		observers.add(observer);
+	//Unique observer 
+	public boolean addObserver(Observer observer) {
+		if (this.observer == null) {
+			this.observer = observer;
+			notifyObservers();
+			return true;
+		} else {
+			//observer not unique
+			return false;
+		}
 	}
 	
-	public void removeObserver(Observer observer) {
-		observers.remove(observer);
+	public boolean removeObserver(Observer observer) {
+		if (this.observer.equals(observer)) {
+			this.observer = null;
+			return true;
+		}
+		return false;
 	}
 	
 	private void notifyObservers() {
-		for (Observer observer : observers) {
+		if (this.observer != null) {
 			observer.update();
 		}
 	}
 
-	private class ChatboxControllerThread extends Thread {
-
-		public void run() {
-			while (!interrupted) {
-				try {
-					lastMessageChanged = false;
-					activeUsersChanged = false;
-					Operation operation = connection.getOperation();
-					switch(operation.getOperationType()) {
-					case CHATBOX_MAILING :
-						if (operation instanceof MessageOperation) {
-							lastMessage = ((MessageOperation) operation).getMessage();
-							lastMessageChanged = true;
-						}
-						break;
-					case CHATBOX_USERS_LISTING :
-						if (operation instanceof ListUsersOperation) {
-							activeUsers = ((ListUsersOperation) operation).getUsers();
-							activeUsersChanged = true;
-						}
-						break;
-					default :
-						//unknow case
-					}
-					if (lastMessageChanged || activeUsersChanged) {
-						notifyObservers();
-					}
-				} catch (ConnectionException e) {
-					interrupted = true;
-				}
-			}
-		}
-	}
 }

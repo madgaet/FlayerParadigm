@@ -7,7 +7,6 @@ import javax.swing.Box;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import com.trollCorporation.project.controllers.ChatboxOperationsController;
 import com.trollCorporation.project.exceptions.ConnectionException;
 
 public class HomePage extends JFrame {
@@ -17,12 +16,9 @@ public class HomePage extends JFrame {
 	 */
 	private static final long serialVersionUID = -1090911947475162016L;
 	private Dimension pageDimension;
-	private ChatboxOperationsController msgController;
 
-	public HomePage(final String username, final ChatboxOperationsController chatboxController)
-			throws ConnectionException {
+	public HomePage(final String username) throws ConnectionException {
 		this.pageDimension = Toolkit.getDefaultToolkit().getScreenSize();
-		msgController = chatboxController;
 		createHomePage();
 		this.setTitle(username);
 		this.setSize(pageDimension);
@@ -31,7 +27,7 @@ public class HomePage extends JFrame {
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 	}
 	
-	public void createHomePage() {
+	public void createHomePage() throws ConnectionException {
 		Box homePage = Box.createVerticalBox();
 		//Banner
 		Box banner = Box.createHorizontalBox();
@@ -52,7 +48,7 @@ public class HomePage extends JFrame {
 		//Chat
 		Box chat = Box.createHorizontalBox();
 		Dimension chatDimension = new Dimension(pageDimension.width, pageDimension.height/3);
-		JPanel jpChatView = new ChatView(msgController, chatDimension);
+		JPanel jpChatView = new ChatView(chatDimension);
 		jpChatView.setPreferredSize(chatDimension);
 		chat.add(jpChatView);
 		container.add(chat);

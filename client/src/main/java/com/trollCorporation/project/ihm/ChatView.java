@@ -15,6 +15,8 @@ import javax.swing.border.LineBorder;
 
 import com.trollCorporation.common.utils.Observer;
 import com.trollCorporation.project.controllers.ChatboxOperationsController;
+import com.trollCorporation.project.controllers.ChatboxOperationsControllerImpl;
+import com.trollCorporation.project.exceptions.ConnectionException;
 import com.trollCorporation.project.ihm.actions.SendingMessageKeyListener;
 
 public class ChatView extends JPanel implements Observer {
@@ -31,11 +33,11 @@ public class ChatView extends JPanel implements Observer {
 	private ChatboxOperationsController chatboxController;
 	private Dimension dimension;
 	
-	public ChatView(ChatboxOperationsController msgController, Dimension viewDimension) {
+	public ChatView(final Dimension viewDimension) throws ConnectionException {
 		this.dimension = viewDimension;
 		this.setPreferredSize(dimension);
-		this.chatboxController = msgController;
-		msgController.addObserver(this);
+		this.chatboxController = ChatboxOperationsControllerImpl.getInstance();
+		chatboxController.addObserver(this);
 		createChatView();
 		this.setBorder(new LineBorder(Color.PINK));
 		this.setBackground(Color.GRAY);
@@ -97,7 +99,11 @@ public class ChatView extends JPanel implements Observer {
 	
 	private void updateUserList() {
 		if (chatboxController.isActiveUsersChanged()) {
-			userList.removeAll();
+			if (userList == null) {
+				userList = Box.createVerticalBox();
+			} else {
+				userList.removeAll();
+			}
 			List<String> users = chatboxController.getActiveUsers();
 			for (String user : users) {
 				userList.add(new JLabel(user));
