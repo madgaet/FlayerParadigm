@@ -13,10 +13,10 @@ import javax.swing.JTextField;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 
+import com.trollCorporation.common.exceptions.ConnectionException;
 import com.trollCorporation.common.utils.Observer;
 import com.trollCorporation.project.controllers.ChatboxOperationsController;
 import com.trollCorporation.project.controllers.ChatboxOperationsControllerImpl;
-import com.trollCorporation.project.exceptions.ConnectionException;
 import com.trollCorporation.project.ihm.actions.SendingMessageKeyListener;
 
 public class ChatView extends JPanel implements Observer {

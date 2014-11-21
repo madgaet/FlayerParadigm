@@ -5,16 +5,11 @@ import java.net.Socket;
 
 import org.apache.log4j.Logger;
 
-import com.trollCorporation.common.model.ConnectionOperation;
-import com.trollCorporation.common.model.ListUsersOperation;
-import com.trollCorporation.common.model.Message;
-import com.trollCorporation.common.model.MessageOperation;
+import com.trollCorporation.common.exceptions.ConnectionException;
 import com.trollCorporation.common.model.Operation;
 import com.trollCorporation.common.model.OperationType;
-import com.trollCorporation.common.model.User;
 import com.trollCorporation.common.utils.ConfigurationsUtils;
 import com.trollCorporation.common.utils.MessageUtils;
-import com.trollCorporation.project.exceptions.ConnectionException;
 
 public class ConnectionToServer {
 
@@ -61,49 +56,41 @@ public class ConnectionToServer {
 		}
 	}
 	
-	public void sendMessage(final String message) throws ConnectionException {
+	public void sendOperation(final Operation operation) throws ConnectionException {
 		try {
-			Message messageObj = new Message(message);
-			MessageOperation messageOperation = new MessageOperation(messageObj);
-			MessageUtils.sendOperation(sock, messageOperation);
+			if (sock == null) {
+				throw new ConnectionException("The connection has not been set up!");
+			}
+			MessageUtils.sendOperation(sock, operation);
 		} catch (IOException e) {
-			LOG.error("sending message isn't working");
+			LOG.error("Operation " + operation.getOperationType().toString() + " has failed!");
 			throw new ConnectionException(e.getMessage());
 		}
 	}
 	
-	public void requestFriendsList() throws ConnectionException {
+	public Operation sendUnconnectedOperation(final Operation operation) throws ConnectionException {
 		try {
-			ListUsersOperation listUsersOperation = new ListUsersOperation();
-			MessageUtils.sendOperation(sock, listUsersOperation);
+			if (OperationType.isADisconnectedOperation(operation.getOperationType())) {
+				createSocket();
+				MessageUtils.sendOperation(sock, operation);
+				int retry = 0;
+				Operation response;
+				do {
+					response = MessageUtils.getOperation(sock);
+					if (response.getOperationType().equals(operation.getOperationType())) {
+						return response;
+					}
+					retry ++;
+				} while (!response.getOperationType().equals(operation.getOperationType())
+						|| retry >= 10);
+			}
 		} catch (IOException e) {
-			LOG.error("sending friends list request isn't working");
+			LOG.error("Operation " + operation.getOperationType().toString() + " has failed!");
+			close();
 			throw new ConnectionException(e.getMessage());
-		}
-	}
-	
-	public boolean connectUserToServer(final User user) throws ConnectionException {
-		try {
-			createSocket();
-			ConnectionOperation connOperation = new ConnectionOperation(user);
-			MessageUtils.sendOperation(sock, connOperation);
-			int retry = 0;
-			Operation operation;
-			do {
-				operation = MessageUtils.getOperation(sock);
-				if (operation.getOperationType().equals(OperationType.CONNECTION)) {
-					ConnectionOperation connOpe = (ConnectionOperation) operation;
-					return connOpe.isConnected();
-				}
-				retry ++;
-			} while (!operation.getOperationType().equals(OperationType.CONNECTION)
-					|| retry >= 10);
-		} catch (IOException e) {
-			LOG.error("sending try connection isn't working");
-			throw new ConnectionException(e.getMessage());
-		}
+		} 
 		close();
-		return false;
+		return null;
 	}
 	
 	public void close() {

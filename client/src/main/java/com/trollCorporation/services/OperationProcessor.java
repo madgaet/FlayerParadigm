@@ -4,13 +4,13 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
+import com.trollCorporation.common.exceptions.ConnectionException;
 import com.trollCorporation.common.model.ListUsersOperation;
 import com.trollCorporation.common.model.MessageOperation;
 import com.trollCorporation.common.model.Operation;
 import com.trollCorporation.common.utils.MessageUtils;
 import com.trollCorporation.project.controllers.ChatboxOperationsController;
 import com.trollCorporation.project.controllers.ChatboxOperationsControllerImpl;
-import com.trollCorporation.project.exceptions.ConnectionException;
 
 public class OperationProcessor extends Thread {
 
@@ -18,10 +18,15 @@ public class OperationProcessor extends Thread {
 	
 	private static OperationProcessor singleton;
 	private boolean interrupted;
-	private ConnectionToServer connection;
 	
 	//injections
-	private ChatboxOperationsController chatboxController = ChatboxOperationsControllerImpl.getInstance();
+	private ConnectionToServer getConnection() throws ConnectionException {
+		return ConnectionToServer.getInstance();
+	}
+	
+	private ChatboxOperationsController getChatboxController() throws ConnectionException {
+		return ChatboxOperationsControllerImpl.getInstance();
+	}
 	
 	public synchronized static OperationProcessor getInstance() throws ConnectionException {
 		if (singleton == null) {
@@ -34,13 +39,12 @@ public class OperationProcessor extends Thread {
 		return singleton;
 	}
 	
-	private OperationProcessor() throws ConnectionException {
-		this.connection = ConnectionToServer.getInstance();
+	private OperationProcessor() {
 	}
 
 	public Operation getOperation() throws ConnectionException {
 		try {
-			return MessageUtils.getOperation(connection.getSocket());
+			return MessageUtils.getOperation(getConnection().getSocket());
 		} catch (IOException e) {
 			LOG.error("retrieving operation isn't working");
 			throw new ConnectionException(e.getMessage());
@@ -54,12 +58,12 @@ public class OperationProcessor extends Thread {
 				switch (operation.getOperationType()) {
 				case CHATBOX_MAILING:
 					if (operation instanceof MessageOperation) {
-						chatboxController.setMessage(((MessageOperation) operation).getMessage());
+						getChatboxController().setMessage(((MessageOperation) operation).getMessage());
 					}
 					break;
 				case CHATBOX_USERS_LISTING:
 					if (operation instanceof ListUsersOperation) {
-						chatboxController.setActiveUsers(((ListUsersOperation) operation).getUsers());
+						getChatboxController().setActiveUsers(((ListUsersOperation) operation).getUsers());
 					}
 					break;
 				default:

@@ -9,9 +9,9 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.trollCorporation.common.exceptions.UnknownTargetException;
 import com.trollCorporation.common.model.User;
 import com.trollCorporation.common.utils.MessageFormatter;
-import com.trollCorporation.exceptions.UnknownTargetException;
 
 public class Server implements Runnable {
 	
@@ -87,10 +87,14 @@ public class Server implements Runnable {
 	public void sendMessageToTarget(final String message, final String target, final Client sender) 
 			throws UnknownTargetException, IOException {
 		if (target != null) {
-			ClientThread targetClient;
-			if ((targetClient = clientHandler.existsClientName(target)) != null) {
-				String formatedMsg = MessageFormatter.formatSentMessage(message, sender.getName());
-				targetClient.getClient().receiveMessage(formatedMsg);
+			String formatedMsg = MessageFormatter.formatSentMessage(message, sender.getName());
+			if (target.equals(sender.getName())) {
+				sender.receiveMessage(formatedMsg);
+			} else {
+				ClientThread targetClient;
+				if ((targetClient = clientHandler.existsClientName(target)) != null) {
+					targetClient.getClient().receiveMessage(formatedMsg);
+				}
 			}
 		} else {
 			for (ClientThread targetClient : clientHandler.getClientsList()) {

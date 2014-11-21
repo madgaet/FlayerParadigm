@@ -6,17 +6,18 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.trollCorporation.common.exceptions.UnknownTargetException;
 import com.trollCorporation.common.model.ActiveUsers;
 import com.trollCorporation.common.model.ConnectionOperation;
 import com.trollCorporation.common.model.ListUsersOperation;
 import com.trollCorporation.common.model.Message;
 import com.trollCorporation.common.model.MessageOperation;
 import com.trollCorporation.common.model.Operation;
+import com.trollCorporation.common.model.RegisterOperation;
 import com.trollCorporation.common.model.User;
 import com.trollCorporation.common.utils.MessageUtils;
 import com.trollCorporation.domain.services.UsersServices;
 import com.trollCorporation.domain.services.UsersServicesImpl;
-import com.trollCorporation.exceptions.UnknownTargetException;
 
 public class Client implements Runnable {
 	
@@ -45,18 +46,11 @@ public class Client implements Runnable {
 					case CONNECTION :
 						connect(operation);
 						break;
+					case REGISTRATION:
+						register(operation);
+						break;
 					case CHATBOX_MAILING :
-						if (operation instanceof MessageOperation) {
-							MessageOperation messageOperation = (MessageOperation) operation;
-							try {
-								String message = messageOperation.getMessage().getMessageValue();
-								//String target = messageOperation.getTarget();
-								String target = null;
-								server.sendMessageToTarget(message, target, this);
-							} catch (UnknownTargetException e) {
-								receiveMessage("[INFO] : This user does not exist or is not connected!");
-							}
-						}
+						mail(operation);
 						break;
 					case CHATBOX_USERS_LISTING :
 						server.sendUsersListToAllClients();
@@ -67,6 +61,7 @@ public class Client implements Runnable {
 		} catch (IOException e) {
 			LOGGER.info("Client " + name + " disconnected for unknow reason!");
 			System.out.println("Client " + name + " disconnected for unknow reason!");
+		} finally {
 			server.disconnect(this);
 		}
 		LOGGER.info("Ending client " + clientNumber + " process!");
@@ -77,10 +72,45 @@ public class Client implements Runnable {
 			ConnectionOperation connectionOperation = (ConnectionOperation) operation;
 			User user = userServices.getUserByName(connectionOperation.getUserName());
 			connectionOperation.connect(user.getPassword());
-			if (receiveConnectionAck(connectionOperation)) {
+			receiveOperation(connectionOperation);
+			if (connectionOperation.isConnected()) {
+				this.name = connectionOperation.getUserName();
 				LOGGER.info("Client " + name + " is connected!");
 			} else {
+				close();
 				LOGGER.info("Failed connection attempt!");
+			}
+		}
+	}
+	
+	private void register(Operation operation) throws IOException {
+		if (operation instanceof RegisterOperation) {
+			RegisterOperation registerOperation = (RegisterOperation) operation;
+			User user = registerOperation.getUser();
+			try {
+				userServices.register(user);
+				registerOperation.setIsRegistered(true);
+				LOGGER.info("Client " + user.getName() + " is registered!");
+			} catch (Exception e) {
+				registerOperation.setIsRegistered(false);
+				LOGGER.info("Registration Failed!", e);
+			} finally {
+				receiveOperation(registerOperation);
+				close();
+			}
+		}
+	}
+	
+	private void mail(Operation operation) throws IOException {
+		if (operation instanceof MessageOperation) {
+			MessageOperation messageOperation = (MessageOperation) operation;
+			try {
+				String message = messageOperation.getMessage().getMessageValue();
+				//String target = messageOperation.getTarget();
+				String target = null;
+				server.sendMessageToTarget(message, target, this);
+			} catch (UnknownTargetException e) {
+				receiveMessage("[INFO] : This user does not exist or is not connected!");
 			}
 		}
 	}
@@ -95,27 +125,20 @@ public class Client implements Runnable {
 		}
 	}
 	
-	public boolean receiveConnectionAck(ConnectionOperation connectionOperation) throws IOException {
-		MessageUtils.sendOperation(socket, connectionOperation);
-		if (connectionOperation.isConnected()) {
-			this.name = connectionOperation.getUserName();
-			return true;
-		} else {
-			close();
-			return false;
-		}
+	public void receiveOperation(Operation operation) throws IOException {
+		MessageUtils.sendOperation(socket, operation);
 	}
 	
 	public void receiveMessage(final String message) throws IOException {
 		Message messageObj = new Message(message);
 		MessageOperation messageOperation = new MessageOperation(messageObj);
-		MessageUtils.sendOperation(socket, messageOperation);
+		receiveOperation(messageOperation);
 	}
 	
 	public void receiveUserList(final List<User> users) throws IOException {
 		ActiveUsers activeUsers = new ActiveUsers(users);
 		ListUsersOperation listUsersOperation = new ListUsersOperation(activeUsers);
-		MessageUtils.sendOperation(socket, listUsersOperation);
+		receiveOperation(listUsersOperation);
 	}
 	
 	public String getName() {
@@ -129,6 +152,20 @@ public class Client implements Runnable {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		} if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		Client other = (Client) obj;
+		if (clientNumber != other.clientNumber) {
+			return false;
+		}
+		return true;
 	}
 
 }

@@ -7,11 +7,11 @@ public class ClientHandler {
 
 	private List<ClientThread> clients = new ArrayList<ClientThread>();
 	
-	public void add(ClientThread client) {
+	public synchronized void add(ClientThread client) {
 		clients.add(client);
 	}
 	
-	public void remove(Client client) {
+	public synchronized void remove(Client client) {
 		for (ClientThread clientThread : clients) {
 			if (clientThread.getClient().equals(client)) {
 				clients.remove(clientThread);

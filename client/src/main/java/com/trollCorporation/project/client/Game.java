@@ -1,11 +1,16 @@
 package com.trollCorporation.project.client;
 
+import com.trollCorporation.common.exceptions.AuthenticationException;
+import com.trollCorporation.common.exceptions.ConnectionException;
+import com.trollCorporation.common.model.Operation;
+import com.trollCorporation.common.model.RegisterOperation;
+import com.trollCorporation.common.model.User;
+import com.trollCorporation.project.controllers.ConnectionController;
 import com.trollCorporation.project.controllers.ConnectionControllerImpl;
-import com.trollCorporation.project.exceptions.AuthenticationException;
-import com.trollCorporation.project.exceptions.ConnectionException;
 import com.trollCorporation.project.ihm.HomePage;
 import com.trollCorporation.project.ihm.connection.ConnectionPage;
 import com.trollCorporation.services.ConnectionToServer;
+import com.trollCorporation.services.OperationProcessor;
 
 public class Game {
 
@@ -15,6 +20,8 @@ public class Game {
 	private HomePage homePage;
 	
 	private ConnectionToServer connection;
+	
+	private ConnectionController connectionController;
 	
 	private Game() {
 		connPage = new ConnectionPage();
@@ -39,17 +46,27 @@ public class Game {
 		}
 	}
 	
-	public void connect(String username, String password) 
+	public void connect(final String username, final String password) 
 			throws ConnectionException, AuthenticationException {
 		setUpConnection();
 		try {
-			new ConnectionControllerImpl(username, password, connection);
+			User user = new User(username);
+			user.setPassword(password);
+			connectionController = new ConnectionControllerImpl(user, connection);
+			connectionController.connect();
 		} catch (AuthenticationException a) {
 			setDownConnection();
 			throw a;
 		}
 		homePage = new HomePage(username);
+		OperationProcessor.getInstance().start();
 		connPage.setVisible(false);
+	}
+	
+	public RegisterOperation register(final Operation operation) throws ConnectionException {
+		setUpConnection();
+		Operation response = connection.sendUnconnectedOperation(operation);
+		return (RegisterOperation)response;
 	}
 	
 	public void disconnect() {
@@ -57,5 +74,6 @@ public class Game {
 		homePage.dispose();
 		homePage = null;
 		connPage.setVisible(true);
+		connPage.reset();
 	}
 }

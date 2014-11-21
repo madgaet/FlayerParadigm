@@ -54,8 +54,8 @@ public class ConnectionPage extends JFrame {
 		tabbledPane.addChangeListener(new TabChangeListener());
 		
 		connectionView = new ConnectionView(this);
-		tabbledPane.addTab("Connection", createConnectionPanel());
 		registrationView = new RegistrationView(this);
+		tabbledPane.addTab("Connection", createConnectionPanel());
 		tabbledPane.addTab("Registration", createRegistrationPanel());
 		centerBox.add(tabbledPane);
 		
@@ -122,22 +122,18 @@ public class ConnectionPage extends JFrame {
 
 	private class TabChangeListener implements ChangeListener {
 		public void stateChanged(ChangeEvent changeEvent) {
-			JTabbedPane sourceTabbedPane = (JTabbedPane) changeEvent.getSource();
-			int index = sourceTabbedPane.getSelectedIndex();
-			if (index == 0) {
-				connectionView.reset();
-				reset();
-			} else if (index == 1) {
-				registrationView.reset();
-				reset();
-			}
+			//JTabbedPane sourceTabbedPane = (JTabbedPane) changeEvent.getSource();
+			//int index = sourceTabbedPane.getSelectedIndex();
+			reset();
 		}
 	}
 	
-	private void reset() {
+	public void reset() {
 		if (infoPanel != null && infoLabel != null) {
 			infoLabel.setText("");
 			infoPanel.setBackground(null);
 		}
+		connectionView.reset();
+		registrationView.reset();
 	}
 }

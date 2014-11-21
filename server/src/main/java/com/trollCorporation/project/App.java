@@ -3,8 +3,11 @@ package com.trollCorporation.project;
 import java.io.IOException;
 import java.net.InetAddress;
 
+import javax.naming.NamingException;
+
 import org.apache.log4j.Logger;
 
+import com.trollCorporation.domain.ejb.configurations.EjbContext;
 import com.trollCorporation.services.Server;
 
 /**
@@ -13,8 +16,10 @@ import com.trollCorporation.services.Server;
  */
 public class App 
 {
-    public static void main( String[] args )
-    {
+    public static void main( String[] args ) throws NamingException {
+    	//load ejb mapping of implementations
+    	new EjbContext();
+    	
     	Logger logger = Logger.getLogger(App.class.getName());
     	int port = 4242;
     	try {
@@ -29,4 +34,5 @@ public class App
     	}
         
     }
+    
 }

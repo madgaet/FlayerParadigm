@@ -2,7 +2,6 @@ package com.trollCorporation.project.ihm.connection;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -11,9 +10,9 @@ import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import com.trollCorporation.common.exceptions.AuthenticationException;
+import com.trollCorporation.common.exceptions.ConnectionException;
 import com.trollCorporation.project.client.Game;
-import com.trollCorporation.project.exceptions.AuthenticationException;
-import com.trollCorporation.project.exceptions.ConnectionException;
 
 public class ConnectionView {
 
@@ -57,28 +56,26 @@ public class ConnectionView {
 		Box buttonsPanel = Box.createHorizontalBox();
 		buttonsPanel.setAlignmentX(Box.CENTER_ALIGNMENT);
 		JButton loginButton = new JButton("Login");
-		loginButton.addActionListener(new LoginActionListener());
+		loginButton.addActionListener((e) -> loginAction(e));
 		buttonsPanel.add(loginButton);
 		content.add(buttonsPanel);
 
 		return content;
 	}
 
-	private class LoginActionListener implements ActionListener {
-		public void actionPerformed(ActionEvent arg0) {
-			try {
-				if (!jtfUsername.getText().trim().isEmpty()
-						& !jtfPassword.getText().isEmpty()) {
-					Game.getInstance().connect(jtfUsername.getText(),
-							jtfPassword.getText());
-				} else {
-					setUserErrorMessage();
-				}
-			} catch (ConnectionException e) {
-				setInternetErrorMessage();
-			} catch (AuthenticationException a) {
-				setAuthenticationErrorMessage();
+	public void loginAction(ActionEvent arg0) {
+		try {
+			if (!jtfUsername.getText().trim().isEmpty()
+					& !jtfPassword.getText().isEmpty()) {
+				Game.getInstance().connect(jtfUsername.getText(),
+						jtfPassword.getText());
+			} else {
+				setUserErrorMessage();
 			}
+		} catch (ConnectionException e) {
+			setInternetErrorMessage();
+		} catch (AuthenticationException a) {
+			setAuthenticationErrorMessage();
 		}
 	}
 
@@ -87,11 +84,14 @@ public class ConnectionView {
 	}
 
 	private void setUserErrorMessage() {
+		reset();
 		if (jtfUsername.getText().trim().isEmpty()) {
 			jtfUsername.setBorder(BorderFactory.createLineBorder(Color.RED));
-		}
+			jtfUsername.setToolTipText("Username can't be empty!");
+		} 
 		if (jtfPassword.getText().isEmpty()) {
 			jtfPassword.setBorder(BorderFactory.createLineBorder(Color.RED));
+			jtfPassword.setToolTipText("Password can't be empty!");
 		}
 		parentPage.setErrorMessage("Some field(s) cannot be empty!");
 	}

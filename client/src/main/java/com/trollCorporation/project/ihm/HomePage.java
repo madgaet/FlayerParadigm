@@ -7,7 +7,7 @@ import javax.swing.Box;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import com.trollCorporation.project.exceptions.ConnectionException;
+import com.trollCorporation.common.exceptions.ConnectionException;
 
 public class HomePage extends JFrame {
 

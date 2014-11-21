@@ -5,26 +5,29 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import com.trollCorporation.common.exceptions.ConnectionException;
 import com.trollCorporation.common.model.ActiveUsers;
+import com.trollCorporation.common.model.ListUsersOperation;
 import com.trollCorporation.common.model.Message;
+import com.trollCorporation.common.model.MessageOperation;
 import com.trollCorporation.common.model.User;
 import com.trollCorporation.common.utils.Observer;
-import com.trollCorporation.project.exceptions.ConnectionException;
 import com.trollCorporation.services.ConnectionToServer;
 
 public class ChatboxOperationsControllerImpl implements ChatboxOperationsController {
 
 	private static ChatboxOperationsController singleton;
-	private ConnectionToServer connection;
 	private Observer observer;
 	private boolean lastMessageChanged;
 	private Message lastMessage;
 	private boolean activeUsersChanged;
 	private ActiveUsers activeUsers;
 	
-	private ChatboxOperationsControllerImpl()  
-			throws ConnectionException {
-		this.connection = ConnectionToServer.getInstance();
+	private ConnectionToServer getConnection() throws ConnectionException {
+		return ConnectionToServer.getInstance();
+	}
+
+	private ChatboxOperationsControllerImpl() {
 	}
 	
 	public synchronized static ChatboxOperationsController getInstance() 
@@ -41,7 +44,8 @@ public class ChatboxOperationsControllerImpl implements ChatboxOperationsControl
 	
 	public void getFriendsList() {
 		try {
-			connection.requestFriendsList();
+			ListUsersOperation listUsersOperation = new ListUsersOperation();
+			getConnection().sendOperation(listUsersOperation);
 		} catch (ConnectionException e) {
 			//should not
 		}
@@ -50,7 +54,9 @@ public class ChatboxOperationsControllerImpl implements ChatboxOperationsControl
 	public boolean sendMessage(final String message) {
 		try {
 			if (message != null && !message.trim().isEmpty()) {
-				connection.sendMessage(message);
+				Message messageObj = new Message(message);
+				MessageOperation messageOperation = new MessageOperation(messageObj);
+				getConnection().sendOperation(messageOperation);
 				return true;
 			}
 		} catch (ConnectionException e) {

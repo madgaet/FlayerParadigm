@@ -1,16 +1,26 @@
 package com.trollCorporation.project.ihm.connection;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import com.trollCorporation.common.exceptions.ConnectionException;
+import com.trollCorporation.common.model.Operation;
+import com.trollCorporation.common.model.RegisterOperation;
+import com.trollCorporation.common.model.User;
+import com.trollCorporation.project.client.Game;
+
 public class RegistrationView {
 
+	private static final String EMAIL_REGEX = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*"
+			+ "@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+	
 	private ConnectionPage parentPage;
 	private Box view;
 
@@ -67,21 +77,70 @@ public class RegistrationView {
 		Box buttonsPanel = Box.createHorizontalBox();
 		buttonsPanel.setAlignmentX(Box.CENTER_ALIGNMENT);
 		JButton registerButton = new JButton("Register");
-		registerButton.addActionListener(new RegisterActionListener());
+		registerButton.addActionListener((e) -> {registerAction(e);});
 		buttonsPanel.add(registerButton);
 		content.add(buttonsPanel);
 
 		return content;
 	}
 
-	private class RegisterActionListener implements ActionListener {
-		public void actionPerformed(ActionEvent arg0) {
-			setUnavailableOptionMessage();
+	private void registerAction(ActionEvent e) {
+		Operation registerRequest  = createRegisterOperation();
+		if (registerRequest == null) {
+			return;
+		}
+		try {
+			RegisterOperation registerResponse = Game.getInstance().register(registerRequest);
+			if (registerResponse.isRegistered()) {
+				parentPage.setSuccessMessage("Registration succeded! You may now login");
+			} else {
+				parentPage.setInfoMessage("Your username or email address is/are already used");
+			}
+		} catch (ConnectionException e1) {
+			parentPage.setErrorMessage("Verify your connection!");
 		}
 	}
+	
+	private Operation createRegisterOperation() {
+		RegisterOperation registerOperation = null;
+		if (isFieldsValid()) {
+			registerOperation =  new RegisterOperation();
+			User user = new User(jtfUsername.getText().trim());
+			user.setPassword(jtfPassword.getText());
+			user.setEmail(jtfEmail.getText().trim());
+			registerOperation.setUser(user);
+		}
+		return registerOperation;
+	}
 
-	private void setUnavailableOptionMessage() {
-		parentPage.setInfoMessage("Option not yet available!");
+	private boolean isFieldsValid() {
+		reset();
+		boolean isValid = true;
+		if (jtfUsername.getText().trim().isEmpty()) {
+			jtfUsername.setBorder(BorderFactory.createLineBorder(Color.RED));
+			jtfUsername.setToolTipText("The username can't be empty!");
+			isValid = false;
+		}
+		if (jtfPassword.getText().isEmpty() || jtfPassword.getText().length() < 6) {
+			jtfPassword.setBorder(BorderFactory.createLineBorder(Color.RED));
+			jtfPassword.setToolTipText("The password is not long enough! (min 6 characters)");
+			isValid = false;
+		}
+		if (!jtfPassword.getText().equals(jtfConfPassword.getText())) {
+			jtfPassword.setBorder(BorderFactory.createLineBorder(Color.RED));
+			jtfConfPassword.setBorder(BorderFactory.createLineBorder(Color.RED));
+			jtfConfPassword.setToolTipText("The confirmation is not the same as the password");
+			isValid = false;
+		}
+		if (!jtfEmail.getText().trim().matches(EMAIL_REGEX)) {
+			jtfEmail.setBorder(BorderFactory.createLineBorder(Color.RED));
+			jtfEmail.setToolTipText("The email is not correctly formated!");
+			isValid = false;
+		}
+		if (!isValid) {
+			parentPage.setErrorMessage("Some field(s) are not valid!");
+		}
+		return isValid;
 	}
 	
 	public void reset() {
