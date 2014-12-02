@@ -16,8 +16,8 @@ import com.trollCorporation.common.model.Operation;
 import com.trollCorporation.common.model.RegisterOperation;
 import com.trollCorporation.common.model.User;
 import com.trollCorporation.common.utils.MessageUtils;
+import com.trollCorporation.domain.ejb.configurations.HibernateContext;
 import com.trollCorporation.domain.services.UsersServices;
-import com.trollCorporation.domain.services.UsersServicesImpl;
 
 public class Client implements Runnable {
 	
@@ -27,13 +27,14 @@ public class Client implements Runnable {
 	private Server server;
 	private int clientNumber;
 	private String name;
-	private UsersServices userServices = UsersServicesImpl.getInstance();
+	private UsersServices userServices;
 	
 	public Client(final Socket socket,final Server server) {
 		this.socket = socket;
 		this.server = server;
 		this.clientNumber = count++;
 		this.name = "" + clientNumber;
+		this.userServices =	(UsersServices) HibernateContext.getMappedImpl("UsersServices");
 	}
 	
 	public void run() {

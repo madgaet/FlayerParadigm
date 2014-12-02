@@ -1,21 +1,31 @@
 package com.trollCorporation.domain.entityManager;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
+@Transactional(value=TxType.SUPPORTS)
 public class DomainPersistenceImpl implements DomainPersistence {
 	
-	private static final EntityManager entityManager;
-	
-	static {
-		EntityManagerFactory emf =
-	            Persistence.createEntityManagerFactory("domain");
-		entityManager = emf.createEntityManager();
-	}
+//	@Autowired
+//	private EntityManagerFactory entityManagerFactory;
+	@PersistenceContext
+	private EntityManager entityManager;
 	
 	public synchronized EntityManager getEntityManager() {
+//		if (entityManager == null) {
+//			synchronized (this) {
+//				if (entityManager == null) {
+//					entityManager = entityManagerFactory.createEntityManager();
+//				}
+//			}
+//		}
 		return entityManager;
 	}
-
+	
+//	public void setEntityManagerFactory(EntityManagerFactory entityManagerFactory) {
+//		this.entityManagerFactory = entityManagerFactory;
+//	}
+	
 }

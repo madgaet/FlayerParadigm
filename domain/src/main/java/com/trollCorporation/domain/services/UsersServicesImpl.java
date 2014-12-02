@@ -1,33 +1,19 @@
 package com.trollCorporation.domain.services;
 
-import javax.ejb.Stateless;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.trollCorporation.common.exceptions.RegistrationException;
 import com.trollCorporation.common.model.User;
-import com.trollCorporation.domain.ejb.configurations.EjbContext;
 import com.trollCorporation.domain.users.UserEntity;
 import com.trollCorporation.domain.users.UsersDao;
 
-@Stateless
 public class UsersServicesImpl implements UsersServices {
 	
-	private UsersDao usersDao 
-		= (UsersDao) EjbContext.getMappedImpl(UsersDao.class.getName());
+	@Autowired
+	private UsersDao usersDao;
 	
-	private static UsersServices singleton;
-	
-	private UsersServicesImpl() {
-	}
-	
-	public synchronized static UsersServices getInstance() {
-		if (singleton == null) {
-			synchronized (UsersServicesImpl.class) {
-				if (singleton == null) {
-					singleton = new UsersServicesImpl();
-				}
-			}
-		}
-		return singleton;
+	public void setUsersDao(UsersDao usersDao) {
+		this.usersDao = usersDao;
 	}
 
 	public User getUserByName(String username) {

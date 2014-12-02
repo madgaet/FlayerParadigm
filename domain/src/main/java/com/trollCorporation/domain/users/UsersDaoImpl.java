@@ -2,22 +2,18 @@ package com.trollCorporation.domain.users;
 
 import java.util.List;
 
-import javax.ejb.Local;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
+
+import org.springframework.stereotype.Repository;
 
 import com.trollCorporation.common.exceptions.RegistrationException;
 import com.trollCorporation.domain.entityManager.DomainPersistenceImpl;
 
-@Local(UsersDao.class)
-@Stateless(name="UsersPersistence")
-@TransactionManagement(TransactionManagementType.CONTAINER)
+@Repository("UsersDao")
 public class UsersDaoImpl extends DomainPersistenceImpl implements UsersDao {
 	
 	public UsersDaoImpl(){
@@ -51,7 +47,7 @@ public class UsersDaoImpl extends DomainPersistenceImpl implements UsersDao {
 		}
 	}
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@Transactional(value=TxType.REQUIRED)
 	public synchronized void register(UserEntity user) throws RegistrationException {
 		try {
 			getEntityManager().persist(user);
