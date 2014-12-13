@@ -5,9 +5,9 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 
 import com.trollCorporation.common.exceptions.ConnectionException;
-import com.trollCorporation.common.model.ListUsersOperation;
-import com.trollCorporation.common.model.MessageOperation;
-import com.trollCorporation.common.model.Operation;
+import com.trollCorporation.common.model.operations.ListUsersOperation;
+import com.trollCorporation.common.model.operations.MessageOperation;
+import com.trollCorporation.common.model.operations.Operation;
 import com.trollCorporation.common.utils.MessageUtils;
 import com.trollCorporation.project.controllers.ChatboxOperationsController;
 import com.trollCorporation.project.controllers.ChatboxOperationsControllerImpl;

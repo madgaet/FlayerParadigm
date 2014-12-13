@@ -2,9 +2,9 @@ package com.trollCorporation.project.client;
 
 import com.trollCorporation.common.exceptions.AuthenticationException;
 import com.trollCorporation.common.exceptions.ConnectionException;
-import com.trollCorporation.common.model.Operation;
-import com.trollCorporation.common.model.RegisterOperation;
 import com.trollCorporation.common.model.User;
+import com.trollCorporation.common.model.operations.Operation;
+import com.trollCorporation.common.model.operations.RegisterOperation;
 import com.trollCorporation.project.controllers.ConnectionController;
 import com.trollCorporation.project.controllers.ConnectionControllerImpl;
 import com.trollCorporation.project.ihm.HomePage;

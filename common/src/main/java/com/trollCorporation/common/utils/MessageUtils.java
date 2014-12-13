@@ -7,7 +7,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
-import com.trollCorporation.common.model.Operation;
+import com.trollCorporation.common.model.operations.Operation;
 
 public class MessageUtils {
 	

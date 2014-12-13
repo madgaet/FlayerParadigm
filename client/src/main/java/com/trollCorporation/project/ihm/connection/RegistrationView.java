@@ -11,9 +11,9 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import com.trollCorporation.common.exceptions.ConnectionException;
-import com.trollCorporation.common.model.Operation;
-import com.trollCorporation.common.model.RegisterOperation;
 import com.trollCorporation.common.model.User;
+import com.trollCorporation.common.model.operations.Operation;
+import com.trollCorporation.common.model.operations.RegisterOperation;
 import com.trollCorporation.project.client.Game;
 
 public class RegistrationView {

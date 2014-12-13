@@ -7,10 +7,10 @@ import javax.swing.JOptionPane;
 
 import com.trollCorporation.common.exceptions.ConnectionException;
 import com.trollCorporation.common.model.ActiveUsers;
-import com.trollCorporation.common.model.ListUsersOperation;
 import com.trollCorporation.common.model.Message;
-import com.trollCorporation.common.model.MessageOperation;
 import com.trollCorporation.common.model.User;
+import com.trollCorporation.common.model.operations.ListUsersOperation;
+import com.trollCorporation.common.model.operations.MessageOperation;
 import com.trollCorporation.common.utils.Observer;
 import com.trollCorporation.services.ConnectionToServer;
 

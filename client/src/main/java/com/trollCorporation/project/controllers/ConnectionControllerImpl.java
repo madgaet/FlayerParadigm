@@ -2,9 +2,9 @@ package com.trollCorporation.project.controllers;
 
 import com.trollCorporation.common.exceptions.AuthenticationException;
 import com.trollCorporation.common.exceptions.ConnectionException;
-import com.trollCorporation.common.model.ConnectionOperation;
-import com.trollCorporation.common.model.Operation;
 import com.trollCorporation.common.model.User;
+import com.trollCorporation.common.model.operations.ConnectionOperation;
+import com.trollCorporation.common.model.operations.Operation;
 import com.trollCorporation.services.ConnectionToServer;
 
 public class ConnectionControllerImpl implements ConnectionController {

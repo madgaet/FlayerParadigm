@@ -8,13 +8,13 @@ import org.apache.log4j.Logger;
 
 import com.trollCorporation.common.exceptions.UnknownTargetException;
 import com.trollCorporation.common.model.ActiveUsers;
-import com.trollCorporation.common.model.ConnectionOperation;
-import com.trollCorporation.common.model.ListUsersOperation;
 import com.trollCorporation.common.model.Message;
-import com.trollCorporation.common.model.MessageOperation;
-import com.trollCorporation.common.model.Operation;
-import com.trollCorporation.common.model.RegisterOperation;
 import com.trollCorporation.common.model.User;
+import com.trollCorporation.common.model.operations.ConnectionOperation;
+import com.trollCorporation.common.model.operations.ListUsersOperation;
+import com.trollCorporation.common.model.operations.MessageOperation;
+import com.trollCorporation.common.model.operations.Operation;
+import com.trollCorporation.common.model.operations.RegisterOperation;
 import com.trollCorporation.common.utils.MessageUtils;
 import com.trollCorporation.domain.ejb.configurations.HibernateContext;
 import com.trollCorporation.domain.services.UsersServices;
