@@ -1,5 +1,6 @@
 package com.trollCorporation.domain.users;
 
+import java.util.Calendar;
 import java.util.List;
 
 import javax.persistence.NoResultException;
@@ -50,6 +51,8 @@ public class UsersDaoImpl extends DomainPersistenceImpl implements UsersDao {
 	@Transactional(value=TxType.REQUIRED)
 	public synchronized void register(UserEntity user) throws RegistrationException {
 		try {
+			user.setCreationDate(Calendar.getInstance());
+			user.setModificationDate(Calendar.getInstance());
 			getEntityManager().persist(user);
 		} catch (Exception e) {
 			throw new RegistrationException(e.getMessage(), e);

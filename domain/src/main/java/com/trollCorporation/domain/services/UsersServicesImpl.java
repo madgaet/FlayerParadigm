@@ -2,6 +2,7 @@ package com.trollCorporation.domain.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.trollCorporation.common.exceptions.AlreadyExistsUserException;
 import com.trollCorporation.common.exceptions.RegistrationException;
 import com.trollCorporation.common.model.User;
 import com.trollCorporation.domain.users.UserEntity;
@@ -26,11 +27,17 @@ public class UsersServicesImpl implements UsersServices {
 		return user;
 	}
 
-	public void register(User user) throws RegistrationException {
-		UserEntity userDao = new UserEntity();
-		userDao.setUsername(user.getName());
-		userDao.setPassword(user.getPassword());
-		userDao.setEmail(user.getEmail());
-		usersDao.register(userDao);
+	public void register(User user) throws AlreadyExistsUserException, RegistrationException {
+		if (user != null && user.getName() != null) {
+			if (usersDao.findUserByUsername(user.getName()) != null) {
+				throw new AlreadyExistsUserException();
+			} else {
+				UserEntity userDao = new UserEntity();
+				userDao.setUsername(user.getName());
+				userDao.setPassword(user.getPassword());
+				userDao.setEmail(user.getEmail());
+				usersDao.register(userDao);
+			}
+		}
 	}
 }

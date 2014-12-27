@@ -1,6 +1,7 @@
 package com.trollCorporation.domain.users;
 
 import java.io.Serializable;
+import java.util.Calendar;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,7 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "\"USERS\"")
+@Table(name = "USERS")
 public class UserEntity implements Serializable {
 
 	private static final long serialVersionUID = 938069116002283200L;
@@ -24,11 +25,20 @@ public class UserEntity implements Serializable {
 	private String username;
 	
 	@Column(name = "password")
-	private String password;
+	private byte[] password;
 	
 	@Column(name = "email")
 	private String email;
 
+	@Column(name = "creation_date")
+	private Calendar creationDate;
+	
+	@Column(name = "modify_date")
+	private Calendar modificationDate;
+	
+	@Column(name = "row_version")
+	private int rowVersion;
+	
 	public int getId() {
 		return id;
 	}
@@ -45,11 +55,11 @@ public class UserEntity implements Serializable {
 		this.username = username;
 	}
 
-	public String getPassword() {
+	public byte[] getPassword() {
 		return password;
 	}
 
-	public void setPassword(String password) {
+	public void setPassword(byte[] password) {
 		this.password = password;
 	}
 
@@ -59,6 +69,30 @@ public class UserEntity implements Serializable {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public Calendar getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(Calendar creationDate) {
+		this.creationDate = creationDate;
+	}
+
+	public Calendar getModificationDate() {
+		return modificationDate;
+	}
+
+	public void setModificationDate(Calendar modificationDate) {
+		this.modificationDate = modificationDate;
+	}
+
+	public int getRow_version() {
+		return rowVersion;
+	}
+
+	public void setRow_version(int rowVersion) {
+		this.rowVersion = rowVersion;
 	}
 	
 }

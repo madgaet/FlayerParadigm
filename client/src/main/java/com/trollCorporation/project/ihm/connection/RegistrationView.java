@@ -12,6 +12,7 @@ import javax.swing.JTextField;
 
 import com.trollCorporation.common.exceptions.ConnectionException;
 import com.trollCorporation.common.model.User;
+import com.trollCorporation.common.model.enums.ErrorType;
 import com.trollCorporation.common.model.operations.Operation;
 import com.trollCorporation.common.model.operations.RegisterOperation;
 import com.trollCorporation.project.client.Game;
@@ -94,7 +95,11 @@ public class RegistrationView {
 			if (registerResponse.isRegistered()) {
 				parentPage.setSuccessMessage("Registration succeded! You may now login");
 			} else {
-				parentPage.setInfoMessage("Your username or email address is/are already used");
+				if (registerResponse.getErrorType().equals(ErrorType.USER_ALREADY_EXISTS)) {
+					parentPage.setInfoMessage("Your username or email address is/are already used");
+				} else {
+					parentPage.setErrorMessage("Something went wrong with the server! Please contact an administrator");
+				}
 			}
 		} catch (ConnectionException e1) {
 			parentPage.setErrorMessage("Verify your connection!");

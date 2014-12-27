@@ -3,6 +3,7 @@ package com.trollCorporation.common.model.operations;
 import java.io.Serializable;
 
 import com.trollCorporation.common.model.Message;
+import com.trollCorporation.common.model.enums.OperationType;
 
 public class MessageOperation extends Operation implements Serializable {
 	

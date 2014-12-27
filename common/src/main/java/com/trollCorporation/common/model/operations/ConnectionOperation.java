@@ -1,6 +1,8 @@
 package com.trollCorporation.common.model.operations;
 
 import com.trollCorporation.common.model.User;
+import com.trollCorporation.common.model.enums.OperationType;
+import com.trollCorporation.common.utils.EncryptionUtils;
 
 
 public class ConnectionOperation extends Operation {
@@ -18,7 +20,7 @@ public class ConnectionOperation extends Operation {
 		return user.getName();
 	}
 	
-	public String getEncryptedPassword() {
+	public byte[] getEncryptedPassword() {
 		return user.getPassword();
 	}
 	
@@ -26,11 +28,11 @@ public class ConnectionOperation extends Operation {
 		return connected;
 	}
 	
-	public void connect(String encryptPassword) {
+	public void connect(byte[] encryptPassword) {
 		if (encryptPassword == null) {
 			this.connected = false;
 		} else {
-			this.connected = getEncryptedPassword().equals(encryptPassword);
+			this.connected = EncryptionUtils.compare(getEncryptedPassword(),encryptPassword);
 		}
 	}
 

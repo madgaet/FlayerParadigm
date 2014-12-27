@@ -6,10 +6,13 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.trollCorporation.common.exceptions.AlreadyExistsUserException;
+import com.trollCorporation.common.exceptions.RegistrationException;
 import com.trollCorporation.common.exceptions.UnknownTargetException;
 import com.trollCorporation.common.model.ActiveUsers;
 import com.trollCorporation.common.model.Message;
 import com.trollCorporation.common.model.User;
+import com.trollCorporation.common.model.enums.ErrorType;
 import com.trollCorporation.common.model.operations.ConnectionOperation;
 import com.trollCorporation.common.model.operations.ListUsersOperation;
 import com.trollCorporation.common.model.operations.MessageOperation;
@@ -76,7 +79,8 @@ public class Client implements Runnable {
 			receiveOperation(connectionOperation);
 			if (connectionOperation.isConnected()) {
 				this.name = connectionOperation.getUserName();
-				LOGGER.info("Client " + name + " is connected!");
+				String ipAddress = socket.getRemoteSocketAddress().toString();
+				LOGGER.info("Client " + name + " is connected with ip " + ipAddress + " !");
 			} else {
 				close();
 				LOGGER.info("Failed connection attempt!");
@@ -88,12 +92,16 @@ public class Client implements Runnable {
 		if (operation instanceof RegisterOperation) {
 			RegisterOperation registerOperation = (RegisterOperation) operation;
 			User user = registerOperation.getUser();
+			registerOperation.setIsRegistered(false);
 			try {
 				userServices.register(user);
 				registerOperation.setIsRegistered(true);
 				LOGGER.info("Client " + user.getName() + " is registered!");
-			} catch (Exception e) {
-				registerOperation.setIsRegistered(false);
+			} catch (AlreadyExistsUserException e) {
+				registerOperation.setErrorType(ErrorType.USER_ALREADY_EXISTS);
+				LOGGER.info("Registration Failed!", e);
+			} catch (RegistrationException e) {
+				registerOperation.setErrorType(ErrorType.DB_ERROR);
 				LOGGER.info("Registration Failed!", e);
 			} finally {
 				receiveOperation(registerOperation);

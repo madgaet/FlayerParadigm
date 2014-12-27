@@ -3,6 +3,7 @@ package com.trollCorporation.common.model.operations;
 import java.io.Serializable;
 
 import com.trollCorporation.common.model.ActiveUsers;
+import com.trollCorporation.common.model.enums.OperationType;
 
 public class ListUsersOperation extends Operation implements Serializable {
 	

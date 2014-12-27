@@ -6,8 +6,8 @@ import java.net.Socket;
 import org.apache.log4j.Logger;
 
 import com.trollCorporation.common.exceptions.ConnectionException;
+import com.trollCorporation.common.model.enums.OperationType;
 import com.trollCorporation.common.model.operations.Operation;
-import com.trollCorporation.common.model.operations.OperationType;
 import com.trollCorporation.common.utils.ConfigurationsUtils;
 import com.trollCorporation.common.utils.MessageUtils;
 

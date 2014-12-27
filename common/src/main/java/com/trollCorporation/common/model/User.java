@@ -8,7 +8,7 @@ public class User implements Serializable{
 	
 	private static final long serialVersionUID = 3804073669997133589L;
 	private String name;
-	private String encryptedPassword;
+	private byte[] encryptedPassword;
 	private String email;
 	
 	public User(final String name) {
@@ -23,15 +23,15 @@ public class User implements Serializable{
 		this.encryptedPassword = encryptPassword(password);
 	}
 	
-	public void setEncryptedPassword(String encryptedPassword) {
-		this.encryptedPassword = encryptedPassword;
-	}
-	
-	private String encryptPassword(String password) {
+	private byte[] encryptPassword(String password) {
 		return EncryptionUtils.encrypt(password, name);
 	}
 	
-	public String getPassword() {
+	public void setEncryptedPassword(byte[] encryptedPassword) {
+		this.encryptedPassword = encryptedPassword;
+	}	
+	
+	public byte[] getPassword() {
 		return encryptedPassword;
 	}
 
