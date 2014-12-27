@@ -11,6 +11,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import com.trollCorporation.common.exceptions.ConnectionException;
+import com.trollCorporation.common.exceptions.TimeoutException;
 import com.trollCorporation.common.model.User;
 import com.trollCorporation.common.model.enums.ErrorType;
 import com.trollCorporation.common.model.operations.Operation;
@@ -29,6 +30,8 @@ public class RegistrationView {
 	private JTextField jtfPassword;
 	private JTextField jtfConfPassword;
 	private JTextField jtfEmail;
+	
+	private JButton registerButton;
 
 	public RegistrationView(ConnectionPage page) {
 		this.parentPage = page;
@@ -77,7 +80,7 @@ public class RegistrationView {
 		// Buttons
 		Box buttonsPanel = Box.createHorizontalBox();
 		buttonsPanel.setAlignmentX(Box.CENTER_ALIGNMENT);
-		JButton registerButton = new JButton("Register");
+		registerButton = new JButton("Register");
 		registerButton.addActionListener((e) -> {registerAction(e);});
 		buttonsPanel.add(registerButton);
 		content.add(buttonsPanel);
@@ -86,6 +89,13 @@ public class RegistrationView {
 	}
 
 	private void registerAction(ActionEvent e) {
+		parentPage.enableTabChange(false);
+		registerButton.setEnabled(false);
+		parentPage.setInfoMessage("Trying to register, please wait!");
+		new Thread(() -> {register();}).start();
+	}
+	
+	private void register() {
 		Operation registerRequest  = createRegisterOperation();
 		if (registerRequest == null) {
 			return;
@@ -103,6 +113,11 @@ public class RegistrationView {
 			}
 		} catch (ConnectionException e1) {
 			parentPage.setErrorMessage("Verify your connection!");
+		} catch (TimeoutException t) {
+			parentPage.setErrorMessage("The server is currently overloaded! Please retry later.");
+		} finally {
+			registerButton.setEnabled(true);
+			parentPage.enableTabChange(true);
 		}
 	}
 	

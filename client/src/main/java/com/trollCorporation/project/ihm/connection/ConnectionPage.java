@@ -9,8 +9,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 public class ConnectionPage extends JFrame {
 
@@ -23,6 +21,8 @@ public class ConnectionPage extends JFrame {
 
 	private JPanel infoPanel;
 	private JLabel infoLabel;
+	private JTabbedPane tabbledPane;
+	
 	private ConnectionView connectionView;
 	private RegistrationView registrationView;
 
@@ -48,10 +48,10 @@ public class ConnectionPage extends JFrame {
 		
 		Box centerBox = Box.createHorizontalBox();
 		//Tabbled page (Connection or Registration)
-		JTabbedPane tabbledPane = new JTabbedPane();
+		tabbledPane = new JTabbedPane();
 		tabbledPane.setSize(TABBLEDWIDTH, TABBLEDHEIGHT);
 		tabbledPane.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
-		tabbledPane.addChangeListener(new TabChangeListener());
+		tabbledPane.addChangeListener(changeEvent -> {reset();});
 		
 		connectionView = new ConnectionView(this);
 		registrationView = new RegistrationView(this);
@@ -114,18 +114,14 @@ public class ConnectionPage extends JFrame {
 	void setInfoMessage(final String message) {
 		setMessage(Color.ORANGE, message);
 	}
+	
+	void enableTabChange(boolean active) {
+		tabbledPane.setEnabled(active);
+	}
 
 	private void setMessage(final Color color, final String message) {
 		infoPanel.setBackground(color);
 		infoLabel.setText(message);
-	}
-
-	private class TabChangeListener implements ChangeListener {
-		public void stateChanged(ChangeEvent changeEvent) {
-			//JTabbedPane sourceTabbedPane = (JTabbedPane) changeEvent.getSource();
-			//int index = sourceTabbedPane.getSelectedIndex();
-			reset();
-		}
 	}
 	
 	public void reset() {

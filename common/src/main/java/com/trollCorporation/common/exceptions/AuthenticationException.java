@@ -5,7 +5,7 @@ import org.apache.log4j.Logger;
 public class AuthenticationException extends Exception {
 
 	private static final long serialVersionUID = 4159019031407046523L;
-	private static Logger LOG = Logger.getLogger(ConnectionException.class.getName());
+	private static Logger LOG = Logger.getLogger(AuthenticationException.class.getName());
 	
 	public AuthenticationException() {
 		super();

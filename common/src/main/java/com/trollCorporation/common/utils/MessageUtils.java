@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 
 import com.trollCorporation.common.model.operations.Operation;
 
@@ -19,8 +20,7 @@ public class MessageUtils {
 		oos.flush();
 	}
 	
-	public static Operation getOperation(Socket socket) 
-			throws IOException {
+	public static Operation getOperation(Socket socket) throws IOException, SocketTimeoutException {
 		InputStream stream = socket.getInputStream();
 		ObjectInputStream ois = new ObjectInputStream(stream);
 		try {

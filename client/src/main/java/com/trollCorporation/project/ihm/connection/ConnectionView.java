@@ -12,6 +12,7 @@ import javax.swing.JTextField;
 
 import com.trollCorporation.common.exceptions.AuthenticationException;
 import com.trollCorporation.common.exceptions.ConnectionException;
+import com.trollCorporation.common.exceptions.TimeoutException;
 import com.trollCorporation.project.client.Game;
 
 public class ConnectionView {
@@ -21,6 +22,7 @@ public class ConnectionView {
 
 	private JTextField jtfUsername;
 	private JTextField jtfPassword;
+	private JButton loginButton;
 
 	public ConnectionView(ConnectionPage page) {
 		this.parentPage = page;
@@ -55,7 +57,7 @@ public class ConnectionView {
 		// Buttons
 		Box buttonsPanel = Box.createHorizontalBox();
 		buttonsPanel.setAlignmentX(Box.CENTER_ALIGNMENT);
-		JButton loginButton = new JButton("Login");
+		loginButton = new JButton("Login");
 		loginButton.addActionListener((e) -> loginAction(e));
 		buttonsPanel.add(loginButton);
 		content.add(buttonsPanel);
@@ -64,6 +66,13 @@ public class ConnectionView {
 	}
 
 	public void loginAction(ActionEvent arg0) {
+		parentPage.enableTabChange(false);
+		loginButton.setEnabled(false);
+		setLoginMessage();
+		new Thread(() -> login()).start();
+	}
+
+	private void login() {
 		try {
 			if (!jtfUsername.getText().trim().isEmpty()
 					& !jtfPassword.getText().isEmpty()) {
@@ -72,13 +81,26 @@ public class ConnectionView {
 			} else {
 				setUserErrorMessage();
 			}
+		} catch (TimeoutException t) {
+			setTimeoutErrorMessage();
 		} catch (ConnectionException e) {
 			setInternetErrorMessage();
 		} catch (AuthenticationException a) {
 			setAuthenticationErrorMessage();
+		} finally {
+			loginButton.setEnabled(true);
+			parentPage.enableTabChange(true);
 		}
 	}
+	
+	private void setLoginMessage() {
+		parentPage.setInfoMessage("Trying to connect, please wait!");
+	}
 
+	private void setTimeoutErrorMessage() {
+		parentPage.setErrorMessage("The server is currently overloaded! Please try again.");
+	}
+	
 	private void setInternetErrorMessage() {
 		parentPage.setErrorMessage("Verify your internet connection!");
 	}
@@ -88,7 +110,7 @@ public class ConnectionView {
 		if (jtfUsername.getText().trim().isEmpty()) {
 			jtfUsername.setBorder(BorderFactory.createLineBorder(Color.RED));
 			jtfUsername.setToolTipText("Username can't be empty!");
-		} 
+		}
 		if (jtfPassword.getText().isEmpty()) {
 			jtfPassword.setBorder(BorderFactory.createLineBorder(Color.RED));
 			jtfPassword.setToolTipText("Password can't be empty!");
@@ -101,6 +123,7 @@ public class ConnectionView {
 	}
 
 	public void reset() {
+		loginButton.setEnabled(true);
 		jtfUsername.setBorder(null);
 		jtfPassword.setBorder(null);
 	}

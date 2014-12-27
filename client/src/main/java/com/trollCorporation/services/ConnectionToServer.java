@@ -2,10 +2,13 @@ package com.trollCorporation.services;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 
 import org.apache.log4j.Logger;
 
 import com.trollCorporation.common.exceptions.ConnectionException;
+import com.trollCorporation.common.exceptions.TimeoutException;
 import com.trollCorporation.common.model.enums.OperationType;
 import com.trollCorporation.common.model.operations.Operation;
 import com.trollCorporation.common.utils.ConfigurationsUtils;
@@ -68,34 +71,43 @@ public class ConnectionToServer {
 		}
 	}
 	
-	public Operation sendUnconnectedOperation(final Operation operation) throws ConnectionException {
+	public Operation sendUnconnectedOperation(final Operation operation) throws ConnectionException, TimeoutException {
 		try {
 			if (OperationType.isADisconnectedOperation(operation.getOperationType())) {
 				createSocket();
 				MessageUtils.sendOperation(sock, operation);
 				int retry = 0;
 				Operation response;
+				sock.setSoTimeout(30000);
 				do {
 					response = MessageUtils.getOperation(sock);
 					if (response.getOperationType().equals(operation.getOperationType())) {
 						return response;
 					}
 					retry ++;
+					LOG.warn("Received " + response.getOperationType().toString() + " instead of " +
+					operation.getOperationType() + "! Retrying to get the operation." );
 				} while (!response.getOperationType().equals(operation.getOperationType())
-						|| retry >= 10);
+						|| retry <= 10);
 			}
+		} catch (SocketTimeoutException s) {
+			LOG.error("Server didn't answer in time...");
+			throw new TimeoutException(s.getMessage());
 		} catch (IOException e) {
 			LOG.error("Operation " + operation.getOperationType().toString() + " has failed!");
-			close();
 			throw new ConnectionException(e.getMessage());
-		} 
-		close();
+		} finally {
+			//remove timeout option
+			try {sock.setSoTimeout(0);} catch (SocketException e) {}
+		}
 		return null;
 	}
 	
 	public void close() {
 		try {
-			sock.close();
+			if (sock != null) {
+				sock.close();
+			}
 		} catch (IOException e) {
 			// shouldn't be checked
 		}

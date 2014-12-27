@@ -2,6 +2,7 @@ package com.trollCorporation.project.controllers;
 
 import com.trollCorporation.common.exceptions.AuthenticationException;
 import com.trollCorporation.common.exceptions.ConnectionException;
+import com.trollCorporation.common.exceptions.TimeoutException;
 import com.trollCorporation.common.model.User;
 import com.trollCorporation.common.model.operations.ConnectionOperation;
 import com.trollCorporation.common.model.operations.Operation;
@@ -17,7 +18,7 @@ public class ConnectionControllerImpl implements ConnectionController {
 		this.connection = connection;
 	}
 	
-	public void connect() throws AuthenticationException, ConnectionException {
+	public void connect() throws AuthenticationException, ConnectionException, TimeoutException {
 		ConnectionOperation operation = new ConnectionOperation(user);
 		Operation response = connection.sendUnconnectedOperation(operation);
 		if (response == null || !((ConnectionOperation)response).isConnected()) {

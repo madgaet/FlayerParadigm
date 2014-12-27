@@ -2,6 +2,7 @@ package com.trollCorporation.project.client;
 
 import com.trollCorporation.common.exceptions.AuthenticationException;
 import com.trollCorporation.common.exceptions.ConnectionException;
+import com.trollCorporation.common.exceptions.TimeoutException;
 import com.trollCorporation.common.model.User;
 import com.trollCorporation.common.model.operations.Operation;
 import com.trollCorporation.common.model.operations.RegisterOperation;
@@ -47,25 +48,30 @@ public class Game {
 	}
 	
 	public void connect(final String username, final String password) 
-			throws ConnectionException, AuthenticationException {
+			throws ConnectionException, AuthenticationException, TimeoutException {
 		setUpConnection();
 		try {
 			User user = new User(username);
 			user.setPassword(password);
 			connectionController = new ConnectionControllerImpl(user, connection);
 			connectionController.connect();
-		} catch (AuthenticationException a) {
+		} catch (Exception e) {
 			setDownConnection();
-			throw a;
-		}
+			throw e;
+		} 
 		homePage = new HomePage(username);
 		OperationProcessor.getInstance().start();
 		connPage.setVisible(false);
 	}
 	
-	public RegisterOperation register(final Operation operation) throws ConnectionException {
+	public RegisterOperation register(final Operation operation) throws ConnectionException, TimeoutException {
 		setUpConnection();
-		Operation response = connection.sendUnconnectedOperation(operation);
+		Operation response;
+		try {
+			response = connection.sendUnconnectedOperation(operation);
+		} finally {
+			setDownConnection();
+		}
 		return (RegisterOperation)response;
 	}
 	
