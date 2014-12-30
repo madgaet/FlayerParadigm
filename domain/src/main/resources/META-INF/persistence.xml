@@ -4,5 +4,6 @@ version="2.1">
 	<persistence-unit name="domain" transaction-type="RESOURCE_LOCAL">
 		<provider>org.hibernate.ejb.HibernatePersistence</provider>
 		<class>com.trollCorporation.domain.users.UserEntity</class>
+		<class>com.trollCorporation.domain.users.FriendEntity</class>
 	</persistence-unit>
 </persistence>

@@ -40,5 +40,6 @@
 
 	<context:component-scan base-package="com.trollCorporation.domain.*" />
 	
+	<bean id="UsersDao" class="com.trollCorporation.domain.users.UsersDaoImpl"/>
 	<bean id="UsersServices" class="com.trollCorporation.domain.services.UsersServicesImpl"/>
 </beans>
