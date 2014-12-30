@@ -9,10 +9,12 @@ import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.hibernate.exception.JDBCConnectionException;
 import org.springframework.stereotype.Repository;
 
 import com.trollCorporation.common.exceptions.RegistrationException;
 import com.trollCorporation.domain.entityManager.DomainPersistenceImpl;
+import com.trollCorporation.domain.exceptions.DbConnectionException;
 
 @Repository("UsersDao")
 public class UsersDaoImpl extends DomainPersistenceImpl implements UsersDao {
@@ -37,7 +39,13 @@ public class UsersDaoImpl extends DomainPersistenceImpl implements UsersDao {
 		}
 	}
 
-	public final UserEntity findUserByUsername(final String username) {
+	public final UserEntity findUserByUsername(final String username)
+			throws DbConnectionException {
+		return findUserByUsername(username, 0);
+	}
+	
+	private final UserEntity findUserByUsername(final String username, final int retry)
+			throws DbConnectionException {
 		try {
 			TypedQuery<UserEntity> query = getEntityManager()
 				.createQuery("From UserEntity WHERE username=:username", UserEntity.class);
@@ -45,6 +53,14 @@ public class UsersDaoImpl extends DomainPersistenceImpl implements UsersDao {
 			return query.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
+		} catch (JDBCConnectionException e) {
+			if (retry < 5) {
+				try { Thread.sleep((long)(Math.random()*retry*1000)+125L); }
+				catch (InterruptedException e1) {/*do nothing*/}
+				return findUserByUsername(username, retry+1);
+			} else {
+				throw new DbConnectionException("Error while trying to find user in DB",e);
+			}
 		}
 	}
 	

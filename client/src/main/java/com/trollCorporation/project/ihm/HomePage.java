@@ -12,6 +12,8 @@ import com.trollCorporation.common.exceptions.ConnectionException;
 public class HomePage extends JFrame {
 
 	private static final long serialVersionUID = -1090911947475162016L;
+	private static final int MIN_PAGE_WIDTH = 800;
+	
 	private Dimension pageDimension;
 
 	public HomePage(final String username) throws ConnectionException {
@@ -19,6 +21,8 @@ public class HomePage extends JFrame {
 		createHomePage();
 		this.setTitle(username);
 		this.setSize(pageDimension);
+		this.setMaximumSize(pageDimension);
+		this.setMinimumSize(new Dimension(MIN_PAGE_WIDTH, 600));
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -28,7 +32,8 @@ public class HomePage extends JFrame {
 		Box homePage = Box.createVerticalBox();
 		//Banner
 		Box banner = Box.createHorizontalBox();
-		JPanel jpBanner = new BannerView();
+		BannerView jpBanner = new BannerView();
+		jpBanner.setMinimumSize(new Dimension(MIN_PAGE_WIDTH, BannerView.MIN_BANNER_HEIGHT));
 		jpBanner.setPreferredSize(new Dimension(pageDimension.width, pageDimension.height/18));
 		banner.add(jpBanner);
 		homePage.add(banner);

@@ -3,6 +3,7 @@ package com.trollCorporation.project.client;
 import com.trollCorporation.common.exceptions.AuthenticationException;
 import com.trollCorporation.common.exceptions.ConnectionException;
 import com.trollCorporation.common.exceptions.TimeoutException;
+import com.trollCorporation.common.exceptions.UserAlreadyConnectedException;
 import com.trollCorporation.common.model.User;
 import com.trollCorporation.common.model.operations.Operation;
 import com.trollCorporation.common.model.operations.RegisterOperation;
@@ -47,8 +48,8 @@ public class Game {
 		}
 	}
 	
-	public void connect(final String username, final String password) 
-			throws ConnectionException, AuthenticationException, TimeoutException {
+	public void connect(final String username, final String password) throws ConnectionException,
+			AuthenticationException, TimeoutException, UserAlreadyConnectedException {
 		setUpConnection();
 		try {
 			User user = new User(username);

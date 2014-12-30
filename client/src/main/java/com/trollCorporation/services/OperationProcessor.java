@@ -17,7 +17,7 @@ public class OperationProcessor extends Thread {
 	private static Logger LOG = Logger.getLogger(OperationProcessor.class.getName());
 	
 	private static OperationProcessor singleton;
-	private boolean interrupted;
+	private boolean interrupted = false;
 	
 	//injections
 	private ConnectionToServer getConnection() throws ConnectionException {
@@ -30,7 +30,7 @@ public class OperationProcessor extends Thread {
 	
 	public synchronized static OperationProcessor getInstance() throws ConnectionException {
 		if (singleton == null) {
-			synchronized (ConnectionToServer.class) {
+			synchronized (OperationProcessor.class) {
 				if (singleton == null) {
 					singleton = new OperationProcessor();
 				}
@@ -73,5 +73,7 @@ public class OperationProcessor extends Thread {
 				interrupted = true;
 			}
 		}
+		singleton = null;
 	}
+	
 }

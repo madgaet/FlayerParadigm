@@ -167,8 +167,20 @@ public class ConnectionPage extends JFrame {
 
 	private void setMessage(final Color color, final String message) {
 		infoPanel.setBackground(color);
-		infoLabel.setText(message);
+		String text = format(message);
+		infoLabel.setText(text);
 		repaint();
+	}
+	
+	private String format(final String message) {
+		String sizedMsg = "<html>";
+		if (message.length() > 46) {
+			sizedMsg += message.replaceAll("(.{46})", "<p>$1</p></br>");
+		} else {
+			sizedMsg += message;
+		}
+		sizedMsg += "</html>";
+		return sizedMsg;
 	}
 	
 	public void changeTab(ChangeEvent e) {

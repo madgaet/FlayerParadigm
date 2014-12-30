@@ -13,6 +13,7 @@ import javax.swing.JTextField;
 import com.trollCorporation.common.exceptions.AuthenticationException;
 import com.trollCorporation.common.exceptions.ConnectionException;
 import com.trollCorporation.common.exceptions.TimeoutException;
+import com.trollCorporation.common.exceptions.UserAlreadyConnectedException;
 import com.trollCorporation.project.client.Game;
 
 public class ConnectionView {
@@ -84,6 +85,8 @@ public class ConnectionView {
 			setInternetErrorMessage();
 		} catch (AuthenticationException a) {
 			setAuthenticationErrorMessage();
+		} catch (UserAlreadyConnectedException u) {
+			setUserAlreadyConnectedErrorMessage();
 		} finally {
 			reset();
 		}
@@ -99,6 +102,10 @@ public class ConnectionView {
 	
 	private void setInternetErrorMessage() {
 		parentPage.setErrorMessage("Verify your internet connection!");
+	}
+	
+	private void setUserAlreadyConnectedErrorMessage() {
+		parentPage.setErrorMessage("User already connected");
 	}
 
 	private void setUserErrorMessage() {

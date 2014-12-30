@@ -99,16 +99,11 @@ public class ChatboxOperationsControllerImpl implements ChatboxOperationsControl
 		return usersToStringList;
 	}
 	
-	//Unique observer 
+	//Unique observer but replace old one
 	public boolean addObserver(Observer observer) {
-		if (this.observer == null) {
-			this.observer = observer;
-			notifyObservers();
-			return true;
-		} else {
-			//observer not unique
-			return false;
-		}
+		this.observer = observer;
+		notifyObservers();
+		return true;
 	}
 	
 	public boolean removeObserver(Observer observer) {

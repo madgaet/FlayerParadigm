@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.trollCorporation.common.exceptions.AlreadyExistsUserException;
+import com.trollCorporation.common.exceptions.ConnectionException;
 import com.trollCorporation.common.exceptions.RegistrationException;
 import com.trollCorporation.common.exceptions.UnknownTargetException;
 import com.trollCorporation.common.model.ActiveUsers;
@@ -50,7 +51,9 @@ public class Client implements Runnable {
 					switch (operation.getOperationType()) {
 					case CONNECTION :
 						if (OperationValidator.isValidConnectionOperation(operation)) {
-							connect(operation);
+							if (connect(operation)) {
+								server.sendUsersListToAllClients();
+							}
 						}
 						break;
 					case REGISTRATION:
@@ -78,21 +81,34 @@ public class Client implements Runnable {
 		LOGGER.info("Ending client " + clientNumber + " process!");
 	}
 	
-	private void connect(Operation operation) throws IOException {
+	private boolean connect(Operation operation) throws IOException {
 		if (operation instanceof ConnectionOperation) {
 			ConnectionOperation connectionOperation = (ConnectionOperation) operation;
-			User user = userServices.getUserByName(connectionOperation.getUserName());
-			connectionOperation.connect(user.getPassword());
-			receiveOperation(connectionOperation);
+			try {
+				User user = userServices.getUserByName(connectionOperation.getUserName());
+				connectionOperation.connect(user.getPassword());
+			} catch (ConnectionException c) {
+				connectionOperation.setErrorType(ErrorType.DB_ERROR);
+			}
 			if (connectionOperation.isConnected()) {
-				this.name = connectionOperation.getUserName();
-				String ipAddress = socket.getRemoteSocketAddress().toString();
-				LOGGER.info("Client " + name + " is connected with ip " + ipAddress + " !");
+				if (server.isUserAlreadyConnected(connectionOperation.getUserName())) {
+					connectionOperation.setErrorType(ErrorType.USER_ALREADY_CONNECTED);
+					receiveOperation(connectionOperation);
+					return false;
+				} else {
+					receiveOperation(connectionOperation);
+					this.name = connectionOperation.getUserName();
+					String ipAddress = socket.getRemoteSocketAddress().toString();
+					LOGGER.info("Client " + name + " is connected with ip " + ipAddress + " !");
+					return true;
+				}
 			} else {
+				receiveOperation(connectionOperation);
 				close();
 				LOGGER.info("Failed connection attempt!");
 			}
 		}
+		return false;
 	}
 	
 	private void register(Operation operation) throws IOException {

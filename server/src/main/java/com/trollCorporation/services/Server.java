@@ -55,6 +55,10 @@ public class Server implements Runnable {
 		}
 	}
 	
+	public boolean isUserAlreadyConnected(String name) {
+		return clientHandler.existsClientName(name) != null ? true : false;
+	}
+	
 	public synchronized void disconnect(Client client) {
 		clientHandler.remove(client);
 		sendUsersListToAllClients();

@@ -21,9 +21,12 @@ public class ClientHandler {
 	}
 	
 	public ClientThread existsClientName(String name) {
-		for (ClientThread client : clients) {
-			if (client.getClient().getName().equals(name)) {
-				return client;
+		if (name != null) {
+			for (ClientThread client : clients) {
+				if (client.getClient().getName() != null &&
+						client.getClient().getName().equals(name)) {
+					return client;
+				}
 			}
 		}
 		return null;
