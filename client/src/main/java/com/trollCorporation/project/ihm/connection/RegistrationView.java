@@ -47,6 +47,7 @@ public class RegistrationView {
 
 		// Name field
 		Box nameField = Box.createHorizontalBox();
+		nameField.setBorder(BorderFactory.createEmptyBorder(20, 0, 10, 0));
 		JLabel nameLabel = new JLabel("Username : ");
 		nameField.add(nameLabel);
 		jtfUsername = new JTextField();
@@ -55,6 +56,7 @@ public class RegistrationView {
 
 		// Password field
 		Box pswdField = Box.createHorizontalBox();
+		pswdField.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 		JLabel pswdLabel = new JLabel("Password : ");
 		pswdField.add(pswdLabel);
 		jtfPassword = new JPasswordField();
@@ -63,6 +65,7 @@ public class RegistrationView {
 
 		// Confirm Password field
 		Box confPswdField = Box.createHorizontalBox();
+		confPswdField.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 		JLabel confPswdLabel = new JLabel("Password* : ");
 		confPswdField.add(confPswdLabel);
 		jtfConfPassword = new JPasswordField();
@@ -71,6 +74,7 @@ public class RegistrationView {
 
 		// email field
 		Box emailField = Box.createHorizontalBox();
+		emailField.setBorder(BorderFactory.createEmptyBorder(10, 0, 20, 0));
 		JLabel emailLabel = new JLabel("Email : ");
 		emailField.add(emailLabel);
 		jtfEmail = new JTextField();
@@ -89,17 +93,18 @@ public class RegistrationView {
 	}
 
 	private void registerAction(ActionEvent e) {
-		parentPage.enableTabChange(false);
-		registerButton.setEnabled(false);
-		parentPage.setInfoMessage("Trying to register, please wait!");
-		new Thread(() -> {register();}).start();
+		if (isFieldsValid()) {
+			parentPage.enableTabChange(false);
+			registerButton.setEnabled(false);
+			parentPage.setInfoMessage("Trying to register, please wait!");
+			new Thread(() -> {register();}).start();
+		} else {
+			parentPage.setErrorMessage("Some field(s) are not valid!");
+		}
 	}
 	
 	private void register() {
 		Operation registerRequest  = createRegisterOperation();
-		if (registerRequest == null) {
-			return;
-		}
 		try {
 			RegisterOperation registerResponse = Game.getInstance().register(registerRequest);
 			if (registerResponse.isRegistered()) {
@@ -116,8 +121,7 @@ public class RegistrationView {
 		} catch (TimeoutException t) {
 			parentPage.setErrorMessage("The server is currently overloaded! Please retry later.");
 		} finally {
-			registerButton.setEnabled(true);
-			parentPage.enableTabChange(true);
+			reset();
 		}
 	}
 	
@@ -134,7 +138,6 @@ public class RegistrationView {
 	}
 
 	private boolean isFieldsValid() {
-		reset();
 		boolean isValid = true;
 		if (jtfUsername.getText().trim().isEmpty()) {
 			jtfUsername.setBorder(BorderFactory.createLineBorder(Color.RED));
@@ -157,13 +160,12 @@ public class RegistrationView {
 			jtfEmail.setToolTipText("The email is not correctly formated!");
 			isValid = false;
 		}
-		if (!isValid) {
-			parentPage.setErrorMessage("Some field(s) are not valid!");
-		}
 		return isValid;
 	}
 	
 	public void reset() {
+		registerButton.setEnabled(true);
+		parentPage.enableTabChange(true);
 		jtfUsername.setBorder(null);
 		jtfPassword.setBorder(null);
 		jtfConfPassword.setBorder(null);

@@ -21,6 +21,7 @@ import com.trollCorporation.common.model.operations.RegisterOperation;
 import com.trollCorporation.common.utils.MessageUtils;
 import com.trollCorporation.domain.ejb.configurations.HibernateContext;
 import com.trollCorporation.domain.services.UsersServices;
+import com.trollCorporation.security.OperationValidator;
 
 public class Client implements Runnable {
 	
@@ -48,13 +49,19 @@ public class Client implements Runnable {
 				if (operation != null) {
 					switch (operation.getOperationType()) {
 					case CONNECTION :
-						connect(operation);
+						if (OperationValidator.isValidConnectionOperation(operation)) {
+							connect(operation);
+						}
 						break;
 					case REGISTRATION:
-						register(operation);
+						if (OperationValidator.isValidRegisterOperation(operation)) {
+							register(operation);
+						}
 						break;
 					case CHATBOX_MAILING :
-						mail(operation);
+						if (OperationValidator.isValidMessageOperation(operation)) {
+							mail(operation);
+						}
 						break;
 					case CHATBOX_USERS_LISTING :
 						server.sendUsersListToAllClients();

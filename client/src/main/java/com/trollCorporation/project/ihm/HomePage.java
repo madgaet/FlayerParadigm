@@ -11,9 +11,6 @@ import com.trollCorporation.common.exceptions.ConnectionException;
 
 public class HomePage extends JFrame {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -1090911947475162016L;
 	private Dimension pageDimension;
 

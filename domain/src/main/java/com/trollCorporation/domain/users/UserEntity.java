@@ -2,12 +2,17 @@ package com.trollCorporation.domain.users;
 
 import java.io.Serializable;
 import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -38,6 +43,9 @@ public class UserEntity implements Serializable {
 	
 	@Column(name = "row_version")
 	private int rowVersion;
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
+	private Set<FriendEntity> friends = new HashSet<FriendEntity>();
 	
 	public int getId() {
 		return id;
@@ -87,12 +95,20 @@ public class UserEntity implements Serializable {
 		this.modificationDate = modificationDate;
 	}
 
-	public int getRow_version() {
+	public int getRowVersion() {
 		return rowVersion;
 	}
 
-	public void setRow_version(int rowVersion) {
+	public void setRowVersion(int rowVersion) {
 		this.rowVersion = rowVersion;
+	}
+
+	public Set<FriendEntity> getFriends() {
+		return friends;
+	}
+
+	public void setFriends(Set<FriendEntity> friends) {
+		this.friends = friends;
 	}
 	
 }

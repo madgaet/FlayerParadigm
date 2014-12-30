@@ -98,7 +98,11 @@ public class ConnectionToServer {
 			throw new ConnectionException(e.getMessage());
 		} finally {
 			//remove timeout option
-			try {sock.setSoTimeout(0);} catch (SocketException e) {}
+			try {
+				if (sock != null && !sock.isClosed()) {
+					sock.setSoTimeout(0);
+				}
+			} catch (SocketException e) {}
 		}
 		return null;
 	}

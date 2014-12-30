@@ -38,7 +38,7 @@ public class ConnectionView {
 
 		// Name field
 		Box nameField = Box.createHorizontalBox();
-		nameField.setBorder(BorderFactory.createEmptyBorder(50, 0, 25, 0));
+		nameField.setBorder(BorderFactory.createEmptyBorder(20, 0, 10, 0));
 		JLabel nameLabel = new JLabel("Username : ");
 		nameField.add(nameLabel);
 		jtfUsername = new JTextField();
@@ -47,7 +47,7 @@ public class ConnectionView {
 
 		// Password field
 		Box pswdField = Box.createHorizontalBox();
-		pswdField.setBorder(BorderFactory.createEmptyBorder(25, 0, 50, 0));
+		pswdField.setBorder(BorderFactory.createEmptyBorder(10, 0, 100, 0));
 		JLabel pswdLabel = new JLabel("Password : ");
 		pswdField.add(pswdLabel);
 		jtfPassword = new JPasswordField();
@@ -56,7 +56,6 @@ public class ConnectionView {
 
 		// Buttons
 		Box buttonsPanel = Box.createHorizontalBox();
-		buttonsPanel.setAlignmentX(Box.CENTER_ALIGNMENT);
 		loginButton = new JButton("Login");
 		loginButton.addActionListener((e) -> loginAction(e));
 		buttonsPanel.add(loginButton);
@@ -66,21 +65,19 @@ public class ConnectionView {
 	}
 
 	public void loginAction(ActionEvent arg0) {
-		parentPage.enableTabChange(false);
-		loginButton.setEnabled(false);
-		setLoginMessage();
-		new Thread(() -> login()).start();
+		if (!jtfUsername.getText().trim().isEmpty()	&& !jtfPassword.getText().isEmpty()) {
+			parentPage.enableTabChange(false);
+			loginButton.setEnabled(false);
+			setLoginMessage();
+			new Thread(() -> login()).start();
+		} else {
+			setUserErrorMessage();
+		}
 	}
 
 	private void login() {
 		try {
-			if (!jtfUsername.getText().trim().isEmpty()
-					& !jtfPassword.getText().isEmpty()) {
-				Game.getInstance().connect(jtfUsername.getText(),
-						jtfPassword.getText());
-			} else {
-				setUserErrorMessage();
-			}
+			Game.getInstance().connect(jtfUsername.getText(), jtfPassword.getText());
 		} catch (TimeoutException t) {
 			setTimeoutErrorMessage();
 		} catch (ConnectionException e) {
@@ -88,8 +85,7 @@ public class ConnectionView {
 		} catch (AuthenticationException a) {
 			setAuthenticationErrorMessage();
 		} finally {
-			loginButton.setEnabled(true);
-			parentPage.enableTabChange(true);
+			reset();
 		}
 	}
 	
@@ -116,6 +112,7 @@ public class ConnectionView {
 			jtfPassword.setToolTipText("Password can't be empty!");
 		}
 		parentPage.setErrorMessage("Some field(s) cannot be empty!");
+		parentPage.enableTabChange(true);
 	}
 
 	private void setAuthenticationErrorMessage() {
@@ -124,6 +121,7 @@ public class ConnectionView {
 
 	public void reset() {
 		loginButton.setEnabled(true);
+		parentPage.enableTabChange(true);
 		jtfUsername.setBorder(null);
 		jtfPassword.setBorder(null);
 	}

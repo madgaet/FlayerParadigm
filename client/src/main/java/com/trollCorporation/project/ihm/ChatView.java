@@ -21,9 +21,6 @@ import com.trollCorporation.project.ihm.actions.SendingMessageKeyListener;
 
 public class ChatView extends JPanel implements Observer {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 7679035020047514901L;
 
 	private Box chatBox;
@@ -51,7 +48,7 @@ public class ChatView extends JPanel implements Observer {
 		chat.add(createTextBox());
 		chatView.add(chat);
 		//right part of chat view
-		chatView.add(createUserList());
+		chatView.add(createFriendsList());
 		
 		this.add(chatView);
 	}
@@ -66,7 +63,7 @@ public class ChatView extends JPanel implements Observer {
 		return jspChatBox;
 	}
 	
-	private JScrollPane createUserList() {
+	private JScrollPane createFriendsList() {
 		userList = Box.createVerticalBox();
 		JScrollPane jspUserList = new JScrollPane(userList);
 		Border lineBorder = BorderFactory.createLineBorder(Color.GRAY, 2);
