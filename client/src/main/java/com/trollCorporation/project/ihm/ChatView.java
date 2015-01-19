@@ -127,6 +127,10 @@ public class ChatView extends JPanel implements Observer {
 			Message message = chatboxController.getMessage();
 			ChatUser chatUser = getChatUser(message.getSender());
 			chatUser.addTextMessage(message.getMessageValue(), true);
+			// if chat not open notify user that he get a new msg
+			if (!chatUser.getUser().equals(selectedUser) && chatUser.getUserButtons() != null) {
+				chatUser.getUserButtons().setBackground(new Color(155,155,0,125));
+			}
 		}
 	}
 	
@@ -149,7 +153,7 @@ public class ChatView extends JPanel implements Observer {
 				userPanel.add(userButton, BorderLayout.CENTER);
 				listPanel.add(userPanel, gbc);
 				gbc = getGridBagConstraints(gbc.gridy+1);
-				if (user.equals(selectedUser)) {
+				if (selectedUser != null && user.equals(selectedUser)) {
 					JPanel chatBox = getChatBoxToDraw(user);
 					listPanel.add(chatBox, gbc);
 					gbc = getGridBagConstraints(gbc.gridy+1);
@@ -193,10 +197,12 @@ public class ChatView extends JPanel implements Observer {
 	}
 	
 	private void selectOrUnselectUserChat(final String user) {
+		if (selectedUser != null) {
+			getChatUser(selectedUser).getUserButtons()
+				.setBackground(new Color(120,120,120,175));
+		}
 		if (selectedUser != null && selectedUser.equals(user)) {
 			selectedUser = null;
-			getChatUser(user).getUserButtons()
-				.setBackground(new Color(120,120,120,175));
 		} else {
 			selectedUser = user;
 			getChatUser(user).getUserButtons()
@@ -227,7 +233,7 @@ public class ChatView extends JPanel implements Observer {
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		jspChatBox.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		jspChatBox.setSize(this.getWidth()-20, READ_AREA_HEIGHT);
+		jspChatBox.setSize(this.getWidth()-20, READ_AREA_HEIGHT+15);
 		
 		userChatBox.add(jspChatBox, BorderLayout.CENTER);
 		

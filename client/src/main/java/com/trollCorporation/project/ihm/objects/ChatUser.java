@@ -77,7 +77,7 @@ public class ChatUser {
 			SimpleAttributeSet style = new SimpleAttributeSet();
 			try {
 				if (received) {
-					Color brown = new Color(205, 140, 85);
+					Color brown = new Color(155, 90, 35);
 					StyleConstants.setForeground(style, brown);
 					doc.insertString(doc.getLength(), message, style);
 				} else {
@@ -86,9 +86,6 @@ public class ChatUser {
 				}
 			} catch (BadLocationException e) {};
 			readTextArea.revalidate();
-			if (userButtons != null && received) {
-				userButtons.setBackground(new Color(155,155,0,125));
-			}
 		}
 	}
 
