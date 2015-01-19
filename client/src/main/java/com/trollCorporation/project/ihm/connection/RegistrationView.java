@@ -38,6 +38,10 @@ public class RegistrationView {
 		this.view = createConnexionView();
 	}
 
+	public JButton getButton() {
+		return registerButton;
+	}
+	
 	public Box getView() {
 		return this.view;
 	}

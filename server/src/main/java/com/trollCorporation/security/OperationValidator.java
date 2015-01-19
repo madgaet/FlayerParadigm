@@ -35,7 +35,10 @@ public final class OperationValidator {
 		if (operation instanceof MessageOperation) {
 			MessageOperation messageOpe = (MessageOperation) operation;
 			if (messageOpe.getMessage() != null) {
-				return true;
+				if (messageOpe.getMessage().getMessageValue() != null
+						&& messageOpe.getMessage().getSender() != null) {
+					return true;
+				}
 			}
 		}
 		return false;

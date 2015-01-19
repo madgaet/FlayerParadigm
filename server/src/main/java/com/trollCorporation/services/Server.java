@@ -92,19 +92,24 @@ public class Server implements Runnable {
 			throws UnknownTargetException, IOException {
 		if (target != null) {
 			String formatedMsg = MessageFormatter.formatSentMessage(message, sender.getName());
-			if (target.equals(sender.getName())) {
-				sender.receiveMessage(formatedMsg);
-			} else {
+			ClientThread targetClient;
+			if ((targetClient = clientHandler.existsClientName(target)) != null) {
+				targetClient.getClient().receiveMessage(formatedMsg, sender.getName());
+			}
+		} 
+	}
+	
+	public void sendMessageToTargets(final String message, final List<String> targets, final Client sender) 
+			throws UnknownTargetException, IOException {
+		if (targets != null && !targets.isEmpty()) {
+			String formatedMsg = MessageFormatter.formatSentMessage(message, sender.getName());
+			for (String target : targets) {
 				ClientThread targetClient;
 				if ((targetClient = clientHandler.existsClientName(target)) != null) {
-					targetClient.getClient().receiveMessage(formatedMsg);
+					targetClient.getClient().receiveMessage(formatedMsg, sender.getName());
 				}
 			}
-		} else {
-			for (ClientThread targetClient : clientHandler.getClientsList()) {
-				sendMessageToTarget(message, targetClient.getClient().getName(), sender);
-			}
-		}
+		} 
 	}
 	
 	public void sendUsersListToAllClients() {

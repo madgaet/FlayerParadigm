@@ -136,13 +136,18 @@ public class Client implements Runnable {
 	private void mail(Operation operation) throws IOException {
 		if (operation instanceof MessageOperation) {
 			MessageOperation messageOperation = (MessageOperation) operation;
-			try {
+			String target = null;
+			if (messageOperation.getMessage().getSender().equals(name)) {
 				String message = messageOperation.getMessage().getMessageValue();
-				//String target = messageOperation.getTarget();
-				String target = null;
-				server.sendMessageToTarget(message, target, this);
-			} catch (UnknownTargetException e) {
-				receiveMessage("[INFO] : This user does not exist or is not connected!");
+				List<String> targets = messageOperation.getTargets();
+				for (int i = 0; i < targets.size(); i++) {
+					target = targets.get(i);
+					try {
+						server.sendMessageToTarget(message, target, this);
+					} catch (UnknownTargetException e) {
+						receiveMessage("[INFO] : The user " + target + " does not exist or is not connected!", target);
+					}
+				}
 			}
 		}
 	}
@@ -161,8 +166,8 @@ public class Client implements Runnable {
 		MessageUtils.sendOperation(socket, operation);
 	}
 	
-	public void receiveMessage(final String message) throws IOException {
-		Message messageObj = new Message(message);
+	public void receiveMessage(final String message, final String sender) throws IOException {
+		Message messageObj = new Message(message, sender);
 		MessageOperation messageOperation = new MessageOperation(messageObj);
 		receiveOperation(messageOperation);
 	}

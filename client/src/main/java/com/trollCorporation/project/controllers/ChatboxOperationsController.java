@@ -8,10 +8,11 @@ import com.trollCorporation.common.utils.Observable;
 
 public interface ChatboxOperationsController extends Observable {
 	
-	boolean sendMessage(final String message);
+	boolean sendMessage(String sender, String message);
+	boolean sendMessage(String sender, String message, List<String> receivers);
 	boolean isLastMessageChanged();
 	void setMessage(Message message);
-	String getMessage();
+	Message getMessage();
 	boolean isActiveUsersChanged();
 	void setActiveUsers(ActiveUsers activeUsers);
 	List<String> getActiveUsers();

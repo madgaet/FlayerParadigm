@@ -6,6 +6,7 @@ import com.trollCorporation.common.exceptions.AlreadyExistsUserException;
 import com.trollCorporation.common.exceptions.ConnectionException;
 import com.trollCorporation.common.exceptions.RegistrationException;
 import com.trollCorporation.common.model.User;
+import com.trollCorporation.domain.exceptions.DbConnectionException;
 import com.trollCorporation.domain.users.UserEntity;
 import com.trollCorporation.domain.users.UsersDao;
 
@@ -18,7 +19,12 @@ public class UsersServicesImpl implements UsersServices {
 		this.usersDao = usersDao;
 	}
 
-	public User getUserByName(String username) throws ConnectionException {
+	public final User getUserByName(final String username) throws ConnectionException {
+		return getUserByNameWithRetry(username, 0);
+	}
+		
+	private final User getUserByNameWithRetry(final String username, final int retry) 
+			throws ConnectionException {
 		User user = new User(username);
 		try {
 			UserEntity userDao = usersDao.findUserByUsername(username);
@@ -27,12 +33,19 @@ public class UsersServicesImpl implements UsersServices {
 				user.setEmail(userDao.getEmail());
 			}
 		} catch (Exception e) {
+			if (e instanceof DbConnectionException) {
+				if (retry < 5) {
+					try { Thread.sleep((long)(Math.random()*retry*1000)+1000L); }
+					catch (InterruptedException e1) {/*do nothing*/}
+					return getUserByNameWithRetry(username, retry+1);	
+				}
+			}
 			throw new ConnectionException("Problem while trying to fetch user info in DB", e);
 		}
 		return user;
 	}
 
-	public void register(User user) throws AlreadyExistsUserException, RegistrationException {
+	public final void register(final User user) throws AlreadyExistsUserException, RegistrationException {
 		if (user != null && user.getName() != null) {
 			UserEntity userEntity = null;
 			try {

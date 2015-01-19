@@ -15,7 +15,7 @@ import com.trollCorporation.project.client.Game;
 public class BannerView extends JPanel {
 
 	private static final long serialVersionUID = 8454329494131543657L;
-	public static final int MIN_BANNER_HEIGHT = 140;
+	public static final int BANNER_HEIGHT = 130;
 	private static final int MIN_BANNER_WIDTH = 800;
 
 	private Box bannerBox;
@@ -23,7 +23,7 @@ public class BannerView extends JPanel {
 	public BannerView() {
 		bannerBox = Box.createHorizontalBox();
 		this.setPreferredSize(null);
-		bannerBox.setPreferredSize(new Dimension(MIN_BANNER_WIDTH, MIN_BANNER_HEIGHT));
+		bannerBox.setPreferredSize(new Dimension(MIN_BANNER_WIDTH, BANNER_HEIGHT));
 		JPanel logo = new LogoView();
 		bannerBox.add(logo);
 		JButton jbDisconnect = new JButton("Disconnect");
@@ -44,7 +44,7 @@ public class BannerView extends JPanel {
 		if (d != null) {
 			width = Integer.max(MIN_BANNER_WIDTH, d.width);
 		}
-		int height = MIN_BANNER_HEIGHT;
+		int height = BANNER_HEIGHT;
 		Dimension newDim = new Dimension(width, height);
 		super.setPreferredSize(newDim);
 	}

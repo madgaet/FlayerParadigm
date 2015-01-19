@@ -29,6 +29,10 @@ public class ConnectionView {
 		this.parentPage = page;
 		this.view = createConnexionView();
 	}
+	
+	public JButton getButton() {
+		return loginButton;
+	}
 
 	public Box getView() {
 		return this.view;

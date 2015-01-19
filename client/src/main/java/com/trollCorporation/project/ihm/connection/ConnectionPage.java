@@ -185,6 +185,13 @@ public class ConnectionPage extends JFrame {
 	
 	public void changeTab(ChangeEvent e) {
 		reset();
+		if (tabbledPane.getSelectedIndex() == 0) {
+			this.getRootPane().setDefaultButton(connectionView.getButton());
+		} else if (tabbledPane.getSelectedIndex() == 1) {
+			this.getRootPane().setDefaultButton(registrationView.getButton());
+		} else {
+			this.getRootPane().setDefaultButton(null);
+		}
 	}
 	
 	public void reset() {

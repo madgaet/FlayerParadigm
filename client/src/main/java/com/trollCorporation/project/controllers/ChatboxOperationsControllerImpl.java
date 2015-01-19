@@ -51,11 +51,26 @@ public class ChatboxOperationsControllerImpl implements ChatboxOperationsControl
 		}
 	}
 	
-	public boolean sendMessage(final String message) {
+	public boolean sendMessage(final String sender, final String message) {
 		try {
 			if (message != null && !message.trim().isEmpty()) {
-				Message messageObj = new Message(message);
+				Message messageObj = new Message(message, sender);
 				MessageOperation messageOperation = new MessageOperation(messageObj);
+				getConnection().sendOperation(messageOperation);
+				return true;
+			}
+		} catch (ConnectionException e) {
+			JOptionPane.showMessageDialog(null, "Verify your connection!");
+		}
+		return false;
+	}
+	
+	public boolean sendMessage(final String sender, final String message, final List<String> receivers) {
+		try {
+			if (message != null && !message.trim().isEmpty()) {
+				Message messageObj = new Message(message, sender);
+				MessageOperation messageOperation = new MessageOperation(messageObj);
+				messageOperation.setTargets(receivers);
 				getConnection().sendOperation(messageOperation);
 				return true;
 			}
@@ -75,9 +90,9 @@ public class ChatboxOperationsControllerImpl implements ChatboxOperationsControl
 		notifyObservers();
 	}
 	
-	public String getMessage() {
+	public Message getMessage() {
 		lastMessageChanged = false;
-		return lastMessage.getMessageValue();
+		return lastMessage;
 	}
 	
 	public boolean isActiveUsersChanged() {
@@ -93,8 +108,10 @@ public class ChatboxOperationsControllerImpl implements ChatboxOperationsControl
 	public List<String> getActiveUsers() {
 		activeUsersChanged = false;
 		List<String> usersToStringList = new ArrayList<String>();
-		for (User user : activeUsers.getUsers()) {
-			usersToStringList.add(user.getName());
+		if (activeUsers != null) {
+			for (User user : activeUsers.getUsers()) {
+				usersToStringList.add(user.getName());
+			}
 		}
 		return usersToStringList;
 	}
