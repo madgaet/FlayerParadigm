@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
-import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
@@ -17,7 +16,6 @@ public class ChatUser {
 	
 	private String user;
 	private JButton userButtons;
-	private JPanel drawnChatBoxes;
 	private JTextPane readTextArea;
 	private JTextArea writeTextArea;
 	
@@ -41,14 +39,6 @@ public class ChatUser {
 
 	public final void setUserButtons(JButton userButtons) {
 		this.userButtons = userButtons;
-	}
-
-	public final JPanel getDrawnChatBoxes() {
-		return drawnChatBoxes;
-	}
-
-	public final void setDrawnChatBoxes(JPanel drawnChatBoxes) {
-		this.drawnChatBoxes = drawnChatBoxes;
 	}
 
 	public final JTextPane getReadTextArea() {
@@ -85,7 +75,6 @@ public class ChatUser {
 					doc.insertString(doc.getLength(), message, style);
 				}
 			} catch (BadLocationException e) {};
-			readTextArea.revalidate();
 		}
 	}
 

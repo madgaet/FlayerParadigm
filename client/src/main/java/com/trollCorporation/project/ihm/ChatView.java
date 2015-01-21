@@ -45,7 +45,7 @@ public class ChatView extends JPanel implements Observer {
 	private static final int TITLE_HEIGHT = 60;
 	private static final int ACTIONS_BUTTONS_HEIGHT = 55;
 	//Approximatively 10 rows
-	private static final int READ_AREA_HEIGHT = 170;
+	private static final int READ_AREA_HEIGHT = 180;
 	
 	private String username;
 	
@@ -168,8 +168,8 @@ public class ChatView extends JPanel implements Observer {
 			setDisconnectUserOptions(disconnectUsers);
 			friendList.add(listPanel, BorderLayout.NORTH);
 		}
-		friendList.repaint();
 		friendList.revalidate();
+		friendList.repaint();
 	}
 	
 	private final GridBagConstraints getGridBagConstraints(int gridy) {
@@ -178,6 +178,7 @@ public class ChatView extends JPanel implements Observer {
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.gridwidth = 1;
 		gbc.weightx = 1;
+		gbc.weighty = 1;
 		//in order to have all element verticaly align with each other
 		gbc.gridx = 0;
 		gbc.gridy = gridy;
@@ -208,38 +209,44 @@ public class ChatView extends JPanel implements Observer {
 			getChatUser(user).getUserButtons()
 				.setBackground(new Color(200,200,200,175));
 		}
-		this.updateSize(this.getWidth());
 		updateFriendsList();
 	}
 
 	private final JPanel getChatBoxToDraw(final String user) {
 		ChatUser chatUser = getChatUser(user);
-		JPanel userChatBox = chatUser.getDrawnChatBoxes();
-		if (userChatBox == null) {
-			userChatBox = createChatBox(chatUser);
-			chatUser.setDrawnChatBoxes(userChatBox);
-		} else {
-			chatUser.getWriteTextArea().setEditable(true);
-		}
-		return userChatBox;
+		return createChatBox(chatUser);
 	}
 	
 	private final JPanel createChatBox(final ChatUser chatUser) {
 		JPanel userChatBox = new JPanel(new BorderLayout());
+		// 40 equals approximatively the size of the write area's height
+		userChatBox.setPreferredSize(new Dimension(this.getWidth()-20, READ_AREA_HEIGHT+50));
 		//Create read text area and put it into a jscrollpane to make it readable
-		JTextPane readTextArea = createReadTextArea();
-		chatUser.setReadTextArea(readTextArea);
+		JTextPane readTextArea = chatUser.getReadTextArea();
+		if (readTextArea == null) {
+			readTextArea = createReadTextArea();
+			chatUser.setReadTextArea(readTextArea);
+		}
+		readTextArea.setPreferredSize(new Dimension(this.getWidth()-20, READ_AREA_HEIGHT));
 		JScrollPane jspChatBox = new JScrollPane(readTextArea, 
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		jspChatBox.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		jspChatBox.setSize(this.getWidth()-20, READ_AREA_HEIGHT+15);
+		jspChatBox.setPreferredSize(new Dimension(this.getWidth()-20, READ_AREA_HEIGHT));
 		
-		userChatBox.add(jspChatBox, BorderLayout.CENTER);
+		userChatBox.add(jspChatBox, BorderLayout.NORTH);
 		
 		//Create the write input text area and put it into a jscrollpane
-		JTextArea writeTextArea = createWriteTextArea(chatUser);
-		chatUser.setWriteTextArea(writeTextArea);
+		JTextArea writeTextArea = chatUser.getWriteTextArea();
+		if (writeTextArea == null) {
+			writeTextArea = createWriteTextArea(chatUser);
+			chatUser.setWriteTextArea(writeTextArea);
+		} else {
+			writeTextArea.setEditable(true);
+		}
+		int columns = Math.max((int) Math.round(this.getWidth()/18.8), 0);
+		writeTextArea.setColumns(columns);
+		writeTextArea.invalidate();
 		JScrollPane jspTextField = new JScrollPane(writeTextArea, 
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -252,6 +259,8 @@ public class ChatView extends JPanel implements Observer {
 	private JTextPane createReadTextArea() {
 		JTextPane readTextArea = new JTextPane();
 		readTextArea.setSize(this.getWidth()-15, READ_AREA_HEIGHT);
+		readTextArea.setPreferredSize(new Dimension(this.getWidth()-15, READ_AREA_HEIGHT));
+		readTextArea.setMaximumSize(new Dimension(this.getWidth()-15, READ_AREA_HEIGHT));
 		readTextArea.setMinimumSize(new Dimension(MIN_CHATVIEW_WIDTH-10, READ_AREA_HEIGHT));
 		readTextArea.setEditable(false);
 		((DefaultCaret) readTextArea.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
@@ -264,7 +273,6 @@ public class ChatView extends JPanel implements Observer {
 		writeTextArea.setLineWrap(true);
 		writeTextArea.setWrapStyleWord(true);
 		writeTextArea.setRows(2);
-		writeTextArea.invalidate();
 		// prepare the chat
 		List<String> receivers = new ArrayList<String>();
 		receivers.add(chatUser.getUser());
@@ -330,21 +338,7 @@ public class ChatView extends JPanel implements Observer {
 	}
 
 	public void updateSize(int width) {
-		for (ChatUser chatUser : chatUsers.values()) {
-			JTextArea writeArea = chatUser.getWriteTextArea();
-			if (writeArea != null) { 
-				int columns = Math.max((int) Math.round(width/18.8), 0);
-				writeArea.setColumns(columns);
-				writeArea.invalidate();
-			}
-			JTextPane readArea = chatUser.getReadTextArea();
-			if (readArea != null) {
-				readArea.setSize(width-20, READ_AREA_HEIGHT);
-				readArea.setPreferredSize(new Dimension(width-20, READ_AREA_HEIGHT));
-				readArea.repaint();
-				readArea.revalidate();
-			}
-		}
+		updateFriendsList();
 	}
 	
 	private class ResizeListener extends ComponentAdapter {
