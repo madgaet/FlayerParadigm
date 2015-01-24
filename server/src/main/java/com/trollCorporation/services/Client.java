@@ -10,12 +10,13 @@ import com.trollCorporation.common.exceptions.AlreadyExistsUserException;
 import com.trollCorporation.common.exceptions.ConnectionException;
 import com.trollCorporation.common.exceptions.RegistrationException;
 import com.trollCorporation.common.exceptions.UnknownTargetException;
-import com.trollCorporation.common.model.ActiveUsers;
+import com.trollCorporation.common.model.ListUsers;
 import com.trollCorporation.common.model.Message;
 import com.trollCorporation.common.model.User;
 import com.trollCorporation.common.model.enums.ErrorType;
 import com.trollCorporation.common.model.operations.ConnectionOperation;
-import com.trollCorporation.common.model.operations.ListUsersOperation;
+import com.trollCorporation.common.model.operations.FriendsListUsersOperation;
+import com.trollCorporation.common.model.operations.FriendsRequestOperation;
 import com.trollCorporation.common.model.operations.MessageOperation;
 import com.trollCorporation.common.model.operations.Operation;
 import com.trollCorporation.common.model.operations.RegisterOperation;
@@ -52,7 +53,9 @@ public class Client implements Runnable {
 					case CONNECTION :
 						if (OperationValidator.isValidConnectionOperation(operation)) {
 							if (connect(operation)) {
-								server.sendUsersListToAllClients();
+								server.sendFriendsListToAllClients();
+								server.sendActiveFriendsListToAllClients();
+								server.sendFriendsRequests(this.getName());
 							}
 						}
 						break;
@@ -66,8 +69,17 @@ public class Client implements Runnable {
 							mail(operation);
 						}
 						break;
-					case CHATBOX_USERS_LISTING :
-						server.sendUsersListToAllClients();
+					case USERS_LISTING :
+						if (OperationValidator.isValidListUserOperation(operation)) {
+							listUsers(operation);
+						}
+						break;
+					case FRIENDS_REQUEST:
+						if (OperationValidator.isValidFriendRequestOperation(operation)) {
+							if (executeFriendRequest(operation)) {
+								server.sendFriendsListToClient(this);
+							}
+						}
 						break;
 					}
 				}
@@ -152,6 +164,31 @@ public class Client implements Runnable {
 		}
 	}
 	
+	private void listUsers(Operation operation) throws IOException {
+		if (operation instanceof FriendsListUsersOperation) {
+			if (((FriendsListUsersOperation)operation).isActiveFriendsList()) {
+				server.sendActiveFriendsToClient(this);
+			} else {
+				server.sendFriendsListToClient(this);
+			}
+		}
+	}
+	
+	private boolean executeFriendRequest(Operation operation) throws IOException {
+		if (operation instanceof FriendsRequestOperation) {
+			FriendsRequestOperation friendRequest = (FriendsRequestOperation) operation;
+			if (friendRequest.isAddRequest()) {
+				if (userServices.addFriend(this.getName(), friendRequest.getUsername())) {
+					server.sendFriendsRequests(friendRequest.getUsername());
+					return true;
+				}
+			} else {
+				return userServices.removeFriend(this.getName(), friendRequest.getUsername());
+			}
+		}
+		return false;
+	}
+	
 	public void close() {
 		if (socket != null) {
 			LOGGER.info("Closing socket of client " + clientNumber);
@@ -172,10 +209,17 @@ public class Client implements Runnable {
 		receiveOperation(messageOperation);
 	}
 	
-	public void receiveUserList(final List<User> users) throws IOException {
-		ActiveUsers activeUsers = new ActiveUsers(users);
-		ListUsersOperation listUsersOperation = new ListUsersOperation(activeUsers);
+	public void receiveFriendsList(final List<User> users, boolean active) throws IOException {
+		ListUsers activeUsers = new ListUsers(users);
+		FriendsListUsersOperation listUsersOperation = new FriendsListUsersOperation();
+		listUsersOperation.setUsers(activeUsers);
+		listUsersOperation.setActiveFriendsList(active);
 		receiveOperation(listUsersOperation);
+	}
+	
+	public void receiveFriendRequest(final String name) throws IOException {
+		FriendsRequestOperation friendRequest = new FriendsRequestOperation(name, true);
+		receiveOperation(friendRequest);
 	}
 	
 	public String getName() {

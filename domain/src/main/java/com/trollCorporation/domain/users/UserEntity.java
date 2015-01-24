@@ -5,10 +5,8 @@ import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -44,7 +42,7 @@ public class UserEntity implements Serializable {
 	@Column(name = "row_version")
 	private int rowVersion;
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy="user")
 	private Set<FriendEntity> friends = new HashSet<FriendEntity>();
 	
 	public int getId() {

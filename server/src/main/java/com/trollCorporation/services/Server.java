@@ -12,6 +12,8 @@ import org.apache.log4j.Logger;
 import com.trollCorporation.common.exceptions.UnknownTargetException;
 import com.trollCorporation.common.model.User;
 import com.trollCorporation.common.utils.MessageFormatter;
+import com.trollCorporation.domain.ejb.configurations.HibernateContext;
+import com.trollCorporation.domain.services.UsersServices;
 
 public class Server implements Runnable {
 	
@@ -20,11 +22,13 @@ public class Server implements Runnable {
 	private ServerSocket socketServer;
 	private ClientHandler clientHandler;
 	private volatile boolean interrupted;
+	private UsersServices userServices;
 	
 	public Server(final int port) throws IOException {
 		socketServer = new ServerSocket(port);
 		clientHandler = new ClientHandler();
 		interrupted = false;
+		this.userServices =	(UsersServices) HibernateContext.getMappedImpl("UsersServices");
 	}
 	
 	public void run() {
@@ -61,7 +65,7 @@ public class Server implements Runnable {
 	
 	public synchronized void disconnect(Client client) {
 		clientHandler.remove(client);
-		sendUsersListToAllClients();
+		sendFriendsListToAllClients();
 	}
 	
 	private void handleException(final Exception e) {
@@ -112,24 +116,49 @@ public class Server implements Runnable {
 		} 
 	}
 	
-	public void sendUsersListToAllClients() {
+	public void sendFriendsListToAllClients() {
 		try {
 			for (ClientThread clientThread : this.clientHandler.getClientsList()) {
-				sendUsersListToClient(clientThread.getClient());
+				sendFriendsListToClient(clientThread.getClient());
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	private void sendUsersListToClient(final Client client) throws IOException {
-		List<User> users = new ArrayList<User>();
-		for (ClientThread clientThread : this.clientHandler.getClientsList()) {
-			if (!client.getName().equals(clientThread.getClient().getName())) {
-				users.add(new User(clientThread.getClient().getName()));
+	public void sendActiveFriendsListToAllClients() {
+		try {
+			for (ClientThread clientThread : this.clientHandler.getClientsList()) {
+				sendActiveFriendsToClient(clientThread.getClient());
 			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		client.receiveUserList(users);
 	}
 	
+	void sendFriendsListToClient(final Client client) throws IOException {
+		List<User> friends = userServices.getFriendsListByUsername(client.getName());
+		client.receiveFriendsList(friends, false);
+	}
+	
+	void sendActiveFriendsToClient(final Client client) throws IOException {
+		List<User> friends = new ArrayList<User>();
+		for (User friend : userServices.getFriendsListByUsername(client.getName())) {
+			if (clientHandler.existsClientName(friend.getName()) != null) {
+				friends.add(friend);
+			}
+		}
+		client.receiveFriendsList(friends, true);
+	}
+	
+	public void sendFriendsRequests(final String clientName) throws IOException {
+		ClientThread thread = clientHandler.existsClientName(clientName);
+		Client client =  (thread == null) ? null : thread.getClient();
+		if (client != null) {
+			List<User> friendsRequest = userServices.getFriendsRequests(client.getName());
+			for (User user : friendsRequest) {
+				client.receiveFriendRequest(user.getName());
+			}
+		}
+	}
 }

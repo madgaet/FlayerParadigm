@@ -1,15 +1,11 @@
 package com.trollCorporation.project.controllers;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JOptionPane;
 
 import com.trollCorporation.common.exceptions.ConnectionException;
-import com.trollCorporation.common.model.ActiveUsers;
 import com.trollCorporation.common.model.Message;
-import com.trollCorporation.common.model.User;
-import com.trollCorporation.common.model.operations.ListUsersOperation;
 import com.trollCorporation.common.model.operations.MessageOperation;
 import com.trollCorporation.common.utils.Observer;
 import com.trollCorporation.services.ConnectionToServer;
@@ -20,8 +16,6 @@ public class ChatboxOperationsControllerImpl implements ChatboxOperationsControl
 	private Observer observer;
 	private boolean lastMessageChanged;
 	private Message lastMessage;
-	private boolean activeUsersChanged;
-	private ActiveUsers activeUsers;
 	
 	private ConnectionToServer getConnection() throws ConnectionException {
 		return ConnectionToServer.getInstance();
@@ -40,15 +34,6 @@ public class ChatboxOperationsControllerImpl implements ChatboxOperationsControl
 			}
 		}
 		return singleton;
-	}
-	
-	public void getFriendsList() {
-		try {
-			ListUsersOperation listUsersOperation = new ListUsersOperation();
-			getConnection().sendOperation(listUsersOperation);
-		} catch (ConnectionException e) {
-			//should not
-		}
 	}
 	
 	public boolean sendMessage(final String sender, final String message) {
@@ -93,27 +78,6 @@ public class ChatboxOperationsControllerImpl implements ChatboxOperationsControl
 	public Message getMessage() {
 		lastMessageChanged = false;
 		return lastMessage;
-	}
-	
-	public boolean isActiveUsersChanged() {
-		return activeUsersChanged;
-	}
-	
-	public void setActiveUsers(final ActiveUsers activeUsers) {
-		activeUsersChanged = true;
-		this.activeUsers = activeUsers;
-		notifyObservers();
-	}
-	
-	public List<String> getActiveUsers() {
-		activeUsersChanged = false;
-		List<String> usersToStringList = new ArrayList<String>();
-		if (activeUsers != null) {
-			for (User user : activeUsers.getUsers()) {
-				usersToStringList.add(user.getName());
-			}
-		}
-		return usersToStringList;
 	}
 	
 	//Unique observer but replace old one

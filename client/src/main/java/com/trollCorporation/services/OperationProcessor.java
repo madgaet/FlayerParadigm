@@ -5,12 +5,15 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 
 import com.trollCorporation.common.exceptions.ConnectionException;
-import com.trollCorporation.common.model.operations.ListUsersOperation;
+import com.trollCorporation.common.model.operations.FriendsListUsersOperation;
+import com.trollCorporation.common.model.operations.FriendsRequestOperation;
 import com.trollCorporation.common.model.operations.MessageOperation;
 import com.trollCorporation.common.model.operations.Operation;
 import com.trollCorporation.common.utils.MessageUtils;
 import com.trollCorporation.project.controllers.ChatboxOperationsController;
 import com.trollCorporation.project.controllers.ChatboxOperationsControllerImpl;
+import com.trollCorporation.project.controllers.FriendsController;
+import com.trollCorporation.project.controllers.FriendsControllerImpl;
 
 public class OperationProcessor extends Thread {
 
@@ -26,6 +29,10 @@ public class OperationProcessor extends Thread {
 	
 	private ChatboxOperationsController getChatboxController() throws ConnectionException {
 		return ChatboxOperationsControllerImpl.getInstance();
+	}
+	
+	private FriendsController getFriendsController() throws ConnectionException {
+		return FriendsControllerImpl.getInstance();
 	}
 	
 	public synchronized static OperationProcessor getInstance() throws ConnectionException {
@@ -61,11 +68,23 @@ public class OperationProcessor extends Thread {
 						getChatboxController().setMessage(((MessageOperation) operation).getMessage());
 					}
 					break;
-				case CHATBOX_USERS_LISTING:
-					if (operation instanceof ListUsersOperation) {
-						getChatboxController().setActiveUsers(((ListUsersOperation) operation).getUsers());
+				case USERS_LISTING:
+					if (operation instanceof FriendsListUsersOperation) {
+						FriendsListUsersOperation listUsers = (FriendsListUsersOperation) operation;
+						if (listUsers.isActiveFriendsList()) {
+							getFriendsController().setActiveFriends(listUsers.getUsers());
+						} else {
+							getFriendsController().setFriendsList(listUsers.getUsers());
+						}
 					}
 					break;
+				case FRIENDS_REQUEST:
+					if (operation instanceof FriendsRequestOperation) {
+						FriendsRequestOperation friendRequest = (FriendsRequestOperation) operation;
+						if (friendRequest.isAddRequest()) {
+							getFriendsController().notifyFriendRequest(friendRequest);
+						}
+					}
 				default:
 					// unknow case
 				}

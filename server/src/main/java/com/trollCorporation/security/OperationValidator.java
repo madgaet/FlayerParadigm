@@ -2,6 +2,8 @@ package com.trollCorporation.security;
 
 import com.trollCorporation.common.model.User;
 import com.trollCorporation.common.model.operations.ConnectionOperation;
+import com.trollCorporation.common.model.operations.FriendsRequestOperation;
+import com.trollCorporation.common.model.operations.ListUsersOperation;
 import com.trollCorporation.common.model.operations.MessageOperation;
 import com.trollCorporation.common.model.operations.Operation;
 import com.trollCorporation.common.model.operations.RegisterOperation;
@@ -39,6 +41,23 @@ public final class OperationValidator {
 						&& messageOpe.getMessage().getSender() != null) {
 					return true;
 				}
+			}
+		}
+		return false;
+	}
+	
+	public static boolean isValidListUserOperation(Operation operation) {
+		if (operation instanceof ListUsersOperation) {
+			return true;
+		}
+		return false;
+	}
+	
+	public static boolean isValidFriendRequestOperation(Operation operation) {
+		if (operation instanceof FriendsRequestOperation) {
+			FriendsRequestOperation friendRequest = (FriendsRequestOperation) operation;
+			if (!friendRequest.getUsername().isEmpty()) {
+				return true;
 			}
 		}
 		return false;

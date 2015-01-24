@@ -20,6 +20,7 @@ import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -31,6 +32,8 @@ import com.trollCorporation.common.model.Message;
 import com.trollCorporation.common.utils.Observer;
 import com.trollCorporation.project.controllers.ChatboxOperationsController;
 import com.trollCorporation.project.controllers.ChatboxOperationsControllerImpl;
+import com.trollCorporation.project.controllers.FriendsController;
+import com.trollCorporation.project.controllers.FriendsControllerImpl;
 import com.trollCorporation.project.ihm.actions.SendingMessageKeyListener;
 import com.trollCorporation.project.ihm.objects.ChatUser;
 import com.trollCorporation.project.utils.ImageLoader;
@@ -58,6 +61,7 @@ public class ChatView extends JPanel implements Observer {
 	private Map<String, ChatUser> chatUsers = new HashMap<String, ChatUser>();
 	
 	private ChatboxOperationsController chatboxController;
+	private FriendsController friendsController;
 	private Dimension dimension;
 	
 	public ChatView(final Dimension viewDimension, final String username) throws ConnectionException {
@@ -67,7 +71,9 @@ public class ChatView extends JPanel implements Observer {
 		this.setMinimumSize(new Dimension(MIN_CHATVIEW_WIDTH, MIN_CHATVIEW_HEIGHT));
 		this.addComponentListener(new ResizeListener());
 		this.chatboxController = ChatboxOperationsControllerImpl.getInstance();
+		this.friendsController = FriendsControllerImpl.getInstance();
 		chatboxController.addObserver(this);
+		friendsController.addObserver(this);
 		this.add(createChatView(), BorderLayout.CENTER);
 		this.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		this.setBackground(Color.GRAY);
@@ -143,7 +149,7 @@ public class ChatView extends JPanel implements Observer {
 		if (chatboxController != null) {
 			JPanel listPanel = new JPanel(new GridBagLayout());
 			Set<String> users = new HashSet<String>();
-			users.addAll(chatboxController.getActiveUsers());
+			users.addAll(friendsController.getActiveFriends());
 			users.addAll(chatUsers.keySet());
 			listPanel.setLayout(new GridBagLayout());
 			GridBagConstraints gbc = getGridBagConstraints(0);
@@ -164,7 +170,7 @@ public class ChatView extends JPanel implements Observer {
 			}
 			Set<String> disconnectUsers = new HashSet<String>();
 			disconnectUsers.addAll(chatUsers.keySet());
-			disconnectUsers.removeAll(chatboxController.getActiveUsers());
+			disconnectUsers.removeAll(friendsController.getActiveFriends());
 			setDisconnectUserOptions(disconnectUsers);
 			friendList.add(listPanel, BorderLayout.NORTH);
 		}
@@ -283,7 +289,7 @@ public class ChatView extends JPanel implements Observer {
 	
 	private void setDisconnectUserOptions(final Set<String> users) {
 		for (String user : users) {
-			if (!chatboxController.getActiveUsers().contains(user)) {
+			if (!friendsController.getActiveFriends().contains(user)) {
 				ChatUser chatUser = getChatUser(user);
 				if (chatUser.getWriteTextArea() != null) {
 					chatUser.getWriteTextArea().setEditable(false);
@@ -302,7 +308,7 @@ public class ChatView extends JPanel implements Observer {
 	}
 	
 	private void removeUserChat(final String user) {
-		if (!chatboxController.getActiveUsers().contains(user)){
+		if (!friendsController.getActiveFriends().contains(user)){
 			chatUsers.remove(user);
 			updateFriendsList();
 		}
@@ -331,10 +337,20 @@ public class ChatView extends JPanel implements Observer {
 	}
 	
 	private void addFriend(ActionEvent e) {
-		return;
+		try {
+			JOptionPane.showMessageDialog(this.getParent(), new FriendsActionsView(true), "Add a friend",
+				JOptionPane.PLAIN_MESSAGE);
+		} catch (ConnectionException c) {
+			JOptionPane.showMessageDialog(this.getParent(), "Connection problem!", "Error", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 	private void removeFriend(ActionEvent e) {
-		return;
+		try {
+			JOptionPane.showMessageDialog(this.getParent(), new FriendsActionsView(false), "Remove a friend",
+				JOptionPane.PLAIN_MESSAGE);
+		} catch (ConnectionException c) {
+			JOptionPane.showMessageDialog(this.getParent(), "Connection problem!", "Error", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 
 	public void updateSize(int width) {

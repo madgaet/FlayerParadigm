@@ -4,7 +4,8 @@ public enum OperationType {
 	
 	CONNECTION,
 	CHATBOX_MAILING,
-	CHATBOX_USERS_LISTING,
+	USERS_LISTING,
+	FRIENDS_REQUEST,
 	REGISTRATION;
 	
 	public static boolean isADisconnectedOperation(final OperationType type) {

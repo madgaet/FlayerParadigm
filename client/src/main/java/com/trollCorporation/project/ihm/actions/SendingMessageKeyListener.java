@@ -41,12 +41,14 @@ public class SendingMessageKeyListener implements KeyListener {
 	public void keyReleased(KeyEvent e) {
 		if (KeyEvent.VK_ENTER == e.getKeyCode()) {
 			String msg = jTextField.getText();
-			if (receivers.isEmpty()) {
-				msgController.sendMessage(sender, msg);
-			} else {
-				String formatedMsg = MessageFormatter.formatSentMessage(msg, sender);
-				chatUser.addTextMessage(formatedMsg, false);
-				msgController.sendMessage(sender, msg, receivers);
+			if (!msg.isEmpty()) {
+				if (receivers.isEmpty()) {
+					msgController.sendMessage(sender, msg);
+				} else {
+					String formatedMsg = MessageFormatter.formatSentMessage(msg, sender);
+					chatUser.addTextMessage(formatedMsg, false);
+					msgController.sendMessage(sender, msg, receivers);
+				}
 			}
 			//reset
 			jTextField.setText("");
