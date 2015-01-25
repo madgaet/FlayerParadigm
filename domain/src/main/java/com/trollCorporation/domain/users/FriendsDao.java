@@ -11,6 +11,6 @@ public interface FriendsDao {
 	List<FriendEntity> getFriendsRequests(String username) throws DbConnectionException;
 	
 	void register(FriendEntity friend);
-	void update(FriendEntity friend);
+	FriendEntity update(FriendEntity friend);
 	void delete(FriendEntity friend);
 }

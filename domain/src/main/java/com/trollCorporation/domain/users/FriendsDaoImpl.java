@@ -67,13 +67,14 @@ public class FriendsDaoImpl extends DomainPersistenceImpl implements FriendsDao 
 	}
 	
 	@Transactional(value=TxType.REQUIRED)
-	public void update(final FriendEntity friend) {
-		getEntityManager().merge(friend);
+	public FriendEntity update(final FriendEntity friend) {
+		return getEntityManager().merge(friend);
 	}
 	
 	@Transactional(value=TxType.REQUIRED)
 	public void delete(final FriendEntity friend) {
-		getEntityManager().remove(friend);
+		FriendEntity toRemove = getEntityManager().contains(friend) ? friend : getEntityManager().merge(friend);
+		getEntityManager().remove(toRemove);
 	}
 
 }
