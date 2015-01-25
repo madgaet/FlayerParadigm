@@ -156,8 +156,12 @@ public class Server implements Runnable {
 		Client client =  (thread == null) ? null : thread.getClient();
 		if (client != null) {
 			List<User> friendsRequest = userServices.getFriendsRequests(client.getName());
-			for (User user : friendsRequest) {
-				client.receiveFriendRequest(user.getName());
+			if (!friendsRequest.isEmpty()) {
+				for (User user : friendsRequest) {
+					client.receiveFriendRequest(user.getName());
+				}
+			} else {
+				sendActiveFriendsToClient(client);
 			}
 		}
 	}

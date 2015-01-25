@@ -78,6 +78,7 @@ public class Client implements Runnable {
 						if (OperationValidator.isValidFriendRequestOperation(operation)) {
 							if (executeFriendRequest(operation)) {
 								server.sendFriendsListToClient(this);
+								server.sendActiveFriendsToClient(this);
 							}
 						}
 						break;
