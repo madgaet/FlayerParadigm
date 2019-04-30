@@ -91,6 +91,8 @@ public class ConnectionView {
 			setAuthenticationErrorMessage();
 		} catch (UserAlreadyConnectedException u) {
 			setUserAlreadyConnectedErrorMessage();
+		} catch (Exception e) {
+			// PROBLEM
 		} finally {
 			reset();
 		}

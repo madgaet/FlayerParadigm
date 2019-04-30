@@ -110,14 +110,12 @@ public class FriendsControllerImpl implements FriendsController {
 		}
 	}
 
-	@Override
-	public void sendAddFriendsRequest (final String username) throws ConnectionException {
+	public void sendAddFriendsRequest (String username) throws ConnectionException {
 		FriendsRequestOperation friendRequest = new FriendsRequestOperation(username, true);
 		getConnection().sendOperation(friendRequest);
 	}
 	
-	@Override
-	public void sendRemoveFriendsRequest (final String username) throws ConnectionException {
+	public void sendRemoveFriendsRequest (String username) throws ConnectionException {
 		FriendsRequestOperation friendRequest = new FriendsRequestOperation(username, false);
 		getConnection().sendOperation(friendRequest);
 	}

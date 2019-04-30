@@ -48,8 +48,7 @@ public class Game {
 		}
 	}
 	
-	public void connect(final String username, final String password) throws ConnectionException,
-			AuthenticationException, TimeoutException, UserAlreadyConnectedException {
+	public void connect(final String username, final String password) throws Exception {
 		setUpConnection();
 		try {
 			User user = new User(username);
